@@ -1,19 +1,27 @@
 import { useState } from 'react';
 
-const SubmitReview = () => {
+const SubmitReview = ({  }) => { // Assuming listingId is passed as a prop
   const [name, setName] = useState('');
   const [review, setReview] = useState('');
   const [rating, setRating] = useState(5);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch('http://localhost:5000/reviews', {
+
+    // Make sure listingId is included
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/review/reviews`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, review, rating }),
+      body: JSON.stringify({
+          // Add the listingId here
+        name,
+        review,
+        rating
+      }),
     });
+
     if (response.ok) {
       alert('Review submitted!');
       setName('');

@@ -33,7 +33,7 @@ const kirillmenko = {
             Following his success at the youth level, John took on the role of head coach at a semi-professional club, where he led the team to two league titles and a national cup. His innovative training techniques and strategic acumen earned him recognition, and he was subsequently appointed as the head coach of a professional football team in the top division.`,
     education: `I hold a Bachelor's degree in Sports Science from the University of Birmingham, where he specialized in exercise physiology and sports psychology. He furthered his education with a Master's degree in Coaching and Performance from Loughborough University, focusing on advanced coaching techniques and tactical analysis.`,
     linkedin: "www.linkedin.com/in/deepanshu-sirohi-415269219",
-    // cardData: cardData
+    // cardData: cardData 
 }
 
 export default kirillmenko;

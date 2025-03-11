@@ -1,126 +1,292 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Pill from "@/components/listing/Pill";
 import { useDispatch } from "react-redux";
 import { setForm } from "@/lib/store/formSlice";
+import Image from "next/image";
+import { Calendar, MapPin, Sun, Users } from "lucide-react";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface ListingCardProps {
   category: string;
   title: string;
+  imageUrl: string;
+  priceMode: string;
   price: string;
   mode: string;
   location: string;
   quantity: string;
+  classSize: string;
   startDate: string;
   endDate: string;
   days: string;
   gender: string;
   startTime: string;
   endTime: string;
-  ageGroup: string;
+  minAge: string;
+  maxAge: string;
   description: string;
+  trainerId: string;
+  listingId: string;
+  isFavorite: boolean;
+  categoryName: string;
+  subCategoryName: string;
+  avgRating: number;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
   category,
   title,
+  imageUrl,
+  priceMode,
   price,
   mode,
   location,
   quantity,
+  classSize,
   startDate,
   endDate,
   days,
   gender,
   startTime,
   endTime,
-  ageGroup,
+  minAge,
+  maxAge,
   description,
+  trainerId,
+  listingId,
+  isFavorite,
+  categoryName,
+  subCategoryName,
+  avgRating,
 }) => {
-  const [isSelecetd, setIsSeleceted] = useState<boolean>(false);
-  const dispatch = useDispatch();
-  const handleOnClick = () => {
-    setIsSeleceted(!isSelecetd);
-  };
+  const [isSelected, setIsSelected] = useState<boolean>(isFavorite);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true);
+  const [getImageUrl, setImageUrl] = useState<string>("");
 
   const sendData = () => {
     dispatch(
       setForm({
         category,
         title,
+        priceMode,
         price,
         mode,
         location,
         quantity,
+        classSize,
         startDate,
         endDate,
         days,
         gender,
         startTime,
         endTime,
-        ageGroup,
+        minAge,
+        maxAge,
         description,
+        trainerId,
+        isFavorite,
       })
     );
   };
 
-  return (
-    <div
-      className="flex-col max-sm:w-10/12 mx-4 rounded-2xl overflow-hidden hover:shadow-2xl shadow-lg bg-sky-400 w-full h-[22rem] "
-      onClick={
-        () =>{
-          sendData()
-         router.push(
-        "/courses/ListingDetail"
-        )
-        }
-      }
-    >
-      <div className=" rounded-b-2xl bg-white px-2">
-        <div className="flex px-4 py-4">
-          <img
-            src={"/img/cricket.png"}
-            alt={title}
-            className="h-32 w-24 object-contain"
-          />
-          <div className="flex w-full justify-end items-start">
-            <Pill text={startTime} color="bg-sky-400" icon="/icons/clock.png" />
-          </div>
-        </div>
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      const userId = window.localStorage.getItem("userId");
+      if (!userId) return;
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/favorites/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-        <div>
-          <div className="flex">
-            <Pill text={gender} color="bg-sky-400" icon="/icons/person.png" />
-            <div className="flex flex-grow flexEnd justify-end items-center">
-              <img
+        if (response.ok) {
+          const { favorites } = await response.json();
+          setFavorites(favorites);
+          setIsSelected(favorites.includes(listingId));
+        } else {
+          console.error("Error fetching user favorites");
+        }
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      }
+    };
+
+    const fetchImage = async() => {
+      try {
+        const response2 = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/upload?imageUrl=${imageUrl}`
+        );
+        if (!response2.ok) throw new Error("Failed to fetch signed URL");
+
+        const data = await response2.json();
+        setImageUrl(data.signedUrl);
+      } catch (error) {
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchImage();
+    fetchFavorites();
+  }, [listingId, imageUrl]);
+
+  const handleOnClick = async (event: React.MouseEvent<HTMLImageElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const newIsSelected = !isSelected;
+    setIsSelected(newIsSelected);
+
+    const userId = window.localStorage.getItem("userId");
+    if (!userId) {
+      alert("Please log in to use this feature");
+      router.push("/userflow/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/favorites`,
+        {
+          method: newIsSelected ? "POST" : "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ userId, listingId }),
+        }
+      );
+
+      if (response.ok) {
+        if (newIsSelected) {
+          setFavorites((prevFavorites) => [...prevFavorites, listingId]);
+        } else {
+          setFavorites((prevFavorites) =>
+            prevFavorites.filter((id) => id !== listingId)
+          );
+        }
+      } else {
+        setIsSelected(!newIsSelected);
+        console.error("Error processing favorite");
+      }
+    } catch (error) {
+      setIsSelected(!newIsSelected);
+      console.error("Error processing favorite:", error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center bg-background">
+      <div className="w-full h-auto px-4 py-6 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+          <Card className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 hover:-translate-y-2">
+            <div className="relative">
+              {isLoading ? (
+                <div className="w-full h-[250px]">
+                  <Skeleton height={250} />
+                </div>
+              ) : (
+                <Image
+                  src={getImageUrl || "/img/new/cricket.svg"}
+                  alt={title}
+                  width={500}
+                  height={250}
+                  className="w-full h-[250px] object-cover rounded-t-lg"
+                />
+              )}
+              <Image 
                 src={`${
-                  isSelecetd ? `/icons/filled_fav.png` : `/icons/fav.png`
+                  isSelected ? "/icons/filled_fav.png" : "/icons/fav.png"
                 }`}
                 alt="fav"
-                className="cursor-pointer"
+                width={25}
+                height={25}
                 onClick={handleOnClick}
+                className="absolute top-4 right-4 bg-gray-100 p-1 rounded-full shadow-md cursor-pointer"
               />
             </div>
-          </div>
-          <h3 className="text-xl pt-1 font-semibold">{title}</h3>
-          <p className="text-xs text-gray-500 font-semibold">
-            start:{startDate} <br />
-            {/* end:{endDate} */}
-          </p>
-          <p className="text-xs text-gray-700 py-3">{
-          
-          // description
-          }</p>
+
+            <CardContent className="p-6 space-y-6">
+              {isLoading ? (
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-4">
+                    <Skeleton width={100} />
+                    <Skeleton width={80} />
+                  </div>
+                  <Skeleton height={24} width="80%" />
+                  <Skeleton height={16} width="60%" />
+                  <div className="flex justify-between items-center">
+                    <Skeleton width={80} height={30} />
+                    <Skeleton width={100} height={40} />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-4 text-gray-500">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-6 h-6 opacity-30" />
+                        <span className="text-sm sm:text-base">{mode}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-6 h-6 opacity-30" />
+                        <span className="text-sm sm:text-base">{gender}</span>
+                      </div>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
+                      {title.length > 20 ? title.slice(0, 20) + "..." : title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="w-4 h-4" />
+                      <span>{startTime}</span>
+                      <span>-</span>
+                      <span>{endTime}</span>
+                      <span>•</span>
+                      <span>{category}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg sm:text-xl font-semibold text-[#3D7A81]">
+                      ${price}
+                      <span className="text-sm font-normal text-gray-400">
+                        {priceMode === "Per day"
+                          ? "/day"
+                          : priceMode === "Per month"
+                          ? "/month"
+                          : "/course"}
+                      </span>
+                    </span>
+                    <Button
+                      variant="outline"
+                      className="border-[#1D2735] text-[#1D2735] text-sm sm:text-base"
+                      onClick={() => {
+                        sendData();
+                        router.push(
+                          `/${categoryName}/${subCategoryName}/${listingId}`
+                        );
+                      }}
+                    >
+                      Enroll Now
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </div>
-      <div className="flex justify-center items-center py-4">
-        <button className=" text-white rounded">
-          {category == "Sports" ? "Play" : "Learn"} {title} Now
-        </button>
       </div>
     </div>
   );

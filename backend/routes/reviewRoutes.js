@@ -4,6 +4,6 @@ const reviewRoutes=express.Router();
 
 // review routes
 reviewRoutes.post('/reviews',writeReview);
-reviewRoutes.get('/reviews',getReview);
+reviewRoutes.get('/reviews/:listingId', getReview);
 
 module.exports =reviewRoutes;

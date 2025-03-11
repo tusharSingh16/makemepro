@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from 'react';
-
+import Navbar from '../UserFlow/NavBar'
+import Footer from './Footer';
 interface FormData {
   name: string;
   email: string;
@@ -30,7 +31,9 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <>
+    <Navbar/>
+    <div className="flex justify-center items-center h-screen">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Contact Us</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -85,6 +88,9 @@ const Contact: React.FC = () => {
         </form>
       </div>
     </div>
+    <Footer/>
+    </>
+
   );
 };
 

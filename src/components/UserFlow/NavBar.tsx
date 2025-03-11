@@ -1,93 +1,112 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import UserDashboard from "./UserDashboard";
+import RoleBasedNav from "./RoleBasedNav";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "../ui/button";
+import HomeNavbar from "./HomeNavbar"// Create a separate Navbar for Home
+import Image from "next/image";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [isTrainer, setIsTrainer] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isOrg, setIsOrg] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const router = useRouter();
+  const pathname = usePathname(); // Get current path
+  const isHomePage = pathname === "/";// Check if the current page is Home
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    setIsOrg(role === "organization");
+    setIsTrainer(role === "trainer");
+    setLoggedIn(!!token);
+    setLoading(false);
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  if (isHomePage) {
+    return <HomeNavbar />; // Render HomeNavbar for the Home page
+  }
 
   return (
-    <nav className="bg-white border-b border-gray-300 sticky top-0 z-50">
-      <div className="">
-        <div className="p-5">
-          <div className="hidden md:flex  justify-between ">
-            <div>
-            <Link href="/" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
+    <nav
+      className={`sticky top-0 left-0 right-0 z-50 transition-colors duration-300 bg-white backdrop-blur-sm`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="text-2xl px-5 font-mono font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            {/* <Link href="/">Make Me Pro</Link>/ */}
+            <Link href="/"><Image className="mt-6" src="/Logo/MMP.png" alt="MMP Logo" width={120} height={50} /></Link>
+          </div>
+
+          <div className="flex space-x-6">
+          {/* <Link href="/" className="hidden md:flex text-gray-700 hover:underline">
               Home
-            </Link>
-            <Link href="/courses" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
+            </Link> */}
+            <Link href="/all/courses" className="hidden md:flex text-gray-700 hover:underline">
               Courses
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
+            <Link href="/rentals" className="hidden md:flex text-gray-700 hover:underline">
+              Book a Rental
+            </Link>
+            <Link href="/about" className="hidden md:flex text-gray-700 hover:underline">
               About Us
             </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
-              Contact
+            <Link href="/trainer" className="hidden md:flex text-gray-700 hover:underline">
+              Our Trainers
             </Link>
-            </div>
-            <div>
-            {/* <Link href="/Dashboard/Teacher/join_as_teacher" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
-            </Link> */}
-              <Link href="/userflow/addListing" className="bg-blue-300 text-black px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-200"> Add Listing
-              </Link>
-            <Link href="/dashboard/teacher/join_as_teacher" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
-              Join as Teacher
-            </Link>
-            <Link href="/userflow/login" className="text-gray-700 hover:text-black px-3 py-2 rounded-md text-sm font-medium">
-              Log in
-            </Link>
-            <Link href="/userflow/signup" className="bg-yellow-500 text-black px-3 py-2 rounded-md text-sm font-medium hover:bg-yellow-600">
-              Sign Up
-            </Link>
-            </div>
           </div>
-          <div className="-mr-2 flex md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              type="button"
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-black hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black"
-              aria-controls="mobile-menu"
-              aria-expanded="false"
-            >
-              <span className="sr-only">Open main menu</span>
-              {!isOpen ? (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-              ) : (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div className={`${isOpen ? 'block' : 'hidden'} md:hidden`} id="mobile-menu">
-        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <Link href="/" className="text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium">
-            Home
-          </Link>
-          <Link href="/courses" className="text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium">
-            Courses
-          </Link>
-          <Link href="/about" className="text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium">
-            About Us
-          </Link>
-          <Link href="/contact" className="text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium">
-            Contact
-          </Link>
-          <Link href='/userflow/addListing' className='text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium'> Add Listing</Link>
-          <Link href="/dashboard/teacher/join_as_teacher" className="text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium">
-            Join as Teacher
-          </Link>
-          <Link href="/userflow/login" className="text-gray-700 hover:text-black block px-3 py-2 rounded-md text-base font-medium">
-            Log in
-          </Link>
-          <Link href="/userflow/signup" className="bg-yellow-500 text-white block px-3 py-2 rounded-md text-base font-medium hover:bg-yellow-600">
-            Sign Up
-          </Link>
+          {loggedIn ? (
+            <>
+              {isOrg && (
+                <Link className="bg-yellow-600 p-2 rounded-sm text-white" href="/Organization/createRental">
+                  Create a Rental
+                </Link>
+              )}
+
+              {isTrainer && !loading && <RoleBasedNav />}
+
+              {!isTrainer && !isOrg && (
+                <Link href="/dashboard/teacher/join_as_teacher" className="hidden sm:block hover:underline">
+                  Join as Trainer
+                </Link>
+              )}
+
+              <UserDashboard />
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link href="/dashboard/teacher/join_as_teacher" className="hidden sm:block hover:underline">
+                Join As Trainer
+              </Link>
+              <Button onClick={() => router.push("/userflow/login")} variant="default" className="bg-blue-600 hover:bg-blue-600">
+                Sign in
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </nav>

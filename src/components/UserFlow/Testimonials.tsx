@@ -56,7 +56,7 @@ const Testimonial = () => {
             </div>
           </div>
         </div>
-        <div className="h-50 w-auto sm:w-40 bg-[#56C1FF]  sm:rounded-r-xl flex items-center justify-center">
+        <div className="h-50 w-auto sm:w-40 bg-[#2b748c]  sm:rounded-r-xl flex items-center justify-center">
           
           <Image
             src="/icons/Vector.svg"

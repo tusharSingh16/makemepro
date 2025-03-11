@@ -1,52 +1,99 @@
-"use client";
+import axios from "axios";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-const categories = [
-  { name: "Education", image: "/img/p1.svg" },
-  { name: "Sports", image: "/img/p2.svg" },
-  { name: "Boxing", image: "/img/p3.svg" },
-  { name: "Gymnastics", image: "/img/p4.svg" },
-  { name: "Swimming", image: "/img/p5.svg" },
-  { name: "Dance", image: "/img/p6.svg" },
-  { name: "Music", image: "/img/p7.svg" },
-  { name: "Cycling", image: "/img/p8.svg" },
-  { name: "Athletics", image: "/img/p9.svg" },
-  { name: "Martial Arts", image: "/img/p10.svg" },
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-  // Add the rest of the categories here...
-];
+interface Listing {
+  _id: string;
+  category: string;
+  subCategory: string[];
+}
+
 const Categories = () => {
+  const [getCategories, setCategories] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/category`)
+      .then((res) => {
+        const categoriesData = Array.isArray(res.data) ? res.data : [];
+        setCategories(categoriesData);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
-    <section className="py-2">
-      <div className="flex justify-between items-center px-4 pb-8">
-        <h2 className="  text-2xl font-bold ">Our Top Categories</h2>
-        <Link href="/courses">
-          <button className="text-blue-400 text-xl hover:underline">
-            View all
-          </button>
-        </Link>
-      </div>
-      <div className="px-2 sm:px-20 grid grid-cols-2  md:grid-cols-5 gap-4 0  ">
-        {categories.map((category, index) => (
-          <div
-            onClick={() => {
-              router.push("/courses");
-            }}
-            key={index}
-            className="text-center p-4 border rounded-xl shadow-lg  hover:shadow-2xl cursor-pointer hover:bg-blue-100"
-          >
-            <Image
-              src={category.image}
-              alt={category.name}
-              width={28}
-              height={36}
-              className="w-28 h-36 mx-auto mb-4 "
-            />
-            <h3 className="font-medium">{category.name}</h3>
-          </div>
-        ))}
+    <section className="bg-white/30 container mx-auto py-12">
+      <h2 className="text-4xl font-bold text-center mb-5">
+        Browse <span className="text-blue-600">Categories</span>
+      </h2>
+
+      {/* Smooth scrolling container */}
+      <div className="overflow-hidden max-w-6xl mx-auto relative">
+        <motion.div
+          ref={containerRef}
+          className="flex space-x-6"
+          animate={{
+            x: [0, -getCategories.length * 270, 0],
+          }}
+          transition={{
+            ease: "linear",
+            duration: 12,
+            repeat: Infinity,
+            repeatType: "reverse",
+          }}
+          style={{
+            width: `${getCategories.length * 270}px`,
+          }}
+          whileHover={{ animationPlayState: "paused" }}
+        >
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-lg overflow-hidden shadow-md min-w-[250px] flex-shrink-0"
+                  style={{ width: "250px" }}
+                >
+                  <Skeleton height={200} />
+                  <div className="p-4">
+                    <Skeleton width="80%" />
+                    <Skeleton width="60%" />
+                  </div>
+                </div>
+              ))
+            : getCategories.map((category, i) => (
+                <div
+                  onClick={() => router.push(`/${category.category}`)}
+                  key={i}
+                  className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 hover:-translate-y-2 min-w-[250px]"
+                  style={{ flexShrink: 0, width: "250px" }}
+                >
+                  <div className="aspect-square relative">
+                    <Image
+                      src={`/img/new/${category.category}.jpg`}
+                      alt={category.category}
+                      fill
+                      className="object-cover rounded-t-lg"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-lg">
+                      {category.category}
+                    </h3>
+                  </div>
+                </div>
+              ))}
+        </motion.div>
       </div>
     </section>
   );

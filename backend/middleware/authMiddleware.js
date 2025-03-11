@@ -1,62 +1,86 @@
-const jwt =require("jsonwebtoken");
-const JWT_SECRET=require("../config/jwt");
-const { User } = require("../models/User");
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = require("../config/jwt");
+const { User } = require("../models/user");
+const Trainer = require("../models/Trainer");
 
+function authMiddleware(req, res, next) {
+  const authorizationHeader = req.headers.authorization;
+  
+  // Check if the token exists
+  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+    console.log("No token provided or incorrect format");
+    return res.status(403).json({
+      message: "No token provided or incorrect format",
+    });
+  }
 
-function authMiddleware(req,res,next) {
-    const tokens = req.headers.authorization;
-   const token = tokens.split(" ")[1];
-   if (!tokens || !tokens[0]=='Bearer ') {
+  const token = authorizationHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (decoded && decoded.userId) {
+      // Attach the userId to the request object
+      req.userId = decoded.userId;
+      next();
+    } else {
+        console.log("Invalid token payload: ", decoded);
+      return res.status(403).json({
+        message: "Invalid token",
+      });
+    }
+  } catch (error) {
     return res.status(403).json({
-        message:"!!! "
-    })
-   }
-   try {
-    const decoded = jwt.verify(token,JWT_SECRET);
-   if (decoded) {
-        res.userId =decoded.userId;
-        next();
-   }
-   } catch (error) {
-    return res.status(403).json({
-        message:"!!!!error in middleware "
-    })
-   }
+      message: "Error in authentication middleware",
+      error: error.message,
+    });
+  }
 }
-async function trainerAuthMiddleware(req,res,next) {
-    const tokens = req.headers.authorization;
-   const token = tokens.split(" ")[1];
-   if (!tokens || !tokens[0]=='Bearer ') {
+
+async function trainerAuthMiddleware(req, res, next) {
+  const authorizationHeader = req.headers.authorization;
+  
+  if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
     return res.status(403).json({
-        message:"!!! "
-    })
-   }
-   try {
-    const decoded = jwt.verify(token,JWT_SECRET);
-   if (decoded) {
-       const trainerId =decoded.userId;
-        // console.log(trainerId.role);
-        const isValid = await User.findById({_id:trainerId});
-        console.log(isValid);
-        
-      if (isValid.role=="trainer") {
-        res.trainerId = trainerId ;
+      message: "No token provided or incorrect format",
+    });
+  }
+
+  const token = authorizationHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    if (decoded && decoded.userId) {
+      const trainerId = decoded.userId;
+
+      // Find user and trainer
+      const user = await User.findById(trainerId);
+      const trainer = await Trainer.findById(trainerId);
+
+      // Check if user is a trainer and if the trainer is approved
+      if (user && user.role === "trainer" && trainer && trainer.isApproved === true) {
+        req.trainerId = trainerId;  // Attach trainerId to request
         next();
-      }else{
-        res.json({
-            msg:"join as a teacher!"
-        })
+      } else {
+        return res.status(403).json({
+          message: "You need to be an approved trainer",
+        });
       }
-   }
-   } catch (error) {
+    } else {
+      return res.status(403).json({
+        message: "Invalid token",
+      });
+    }
+  } catch (error) {
     return res.status(403).json({
-        message:"!!!!error in middleware ",
-        error,
-    })
-   }
+      message: "Error in trainer authentication middleware",
+      error: error.message,
+    });
+  }
 }
 
-module.exports ={
-    authMiddleware,
-    trainerAuthMiddleware
+module.exports = {
+  authMiddleware,
+  trainerAuthMiddleware,
 };

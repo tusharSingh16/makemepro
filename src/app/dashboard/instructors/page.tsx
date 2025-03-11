@@ -1,10 +1,10 @@
-import Topbar from '@/components/trainer-dashboard/Topbar'
+import Navbar from '@/components/UserFlow/NavBar'
 import React from 'react'
 
 const AllInstructors = () => {
   return (
     <>
-        <Topbar/>
+        <Navbar/>
         <div className='h-full text-3xl mt-10'>SignupPage</div>
     </>
   )

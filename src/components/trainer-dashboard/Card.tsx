@@ -17,6 +17,7 @@ const Card = ({ imageUrl, icon, title, description }: CardProps) => {
           alt={title}
           className="w-full h-[120px] object-cover rounded-md"
           src={imageUrl}
+          width={50} height={50}
         />
       ) : (
         icon && (

@@ -2,7 +2,7 @@ const express = require("express");
 const jwt=require("jsonwebtoken");
 const zod = require("zod");
 const JWT_SECRET=require("../config/jwt")
-const {Listing} = require('../models/Listing')
+const Listing = require('../models/Listing')
 const {trainerAuthMiddleware } = require("../middleware/authMiddleware");
 // const { default: mongoose } = require("mongoose");
 
@@ -22,7 +22,9 @@ const getListingSchema = zod.object({
   gender: zod.string(),
   startTime: zod.string().optional(),
   endTime: zod.string().optional(),
-  ageGroup: zod.string(),
+  // ageGroup: zod.string(),
+  minAge: zod.string(),
+  maxAge: zod.string(),
   description: zod.string(),
 });
 const postListingSchema = zod.object({
@@ -38,61 +40,37 @@ const postListingSchema = zod.object({
   gender: zod.string(),
   startTime: zod.string(),
   endTime: zod.string(),
-  ageGroup: zod.string(),
+  // ageGroup: zod.string(),
+  minAge: zod.string(),
+  maxAge: zod.string(),
   description: zod.string(),
 });
 
-// listingRouter.get("/listing", authMiddleware, async function (req, res) {
-//   const listing = await Listing.findOne({
-//     userId: res.userId,
-//   });
-//   res.status(200).json({
-//     balance: listing.balance,
-//   });
-// });
-//can be used in listing filtering
 listingRouter.get("/listing", async function (req, res) {
-  const filter = req.query.filter || "";
-  const listing = await Listing.find();
+  const listings = await Listing.find();
 
-  res.status(200).json({listings: listing});
-
+  res.status(200).json({listings});
 });
 
-listingRouter.get("/listing/:listingId", async function (req, res) {
-  // Extract the listingId from the route parameter
-  const { listingId } = req.params;
-
+listingRouter.get("/approvedListing", async (req, res) => {
   try {
-    // Fetch the listing from the database using the listingId
-    const listing = await Listing.findById(listingId);
-
-    // Check if the listing exists
-    if (!listing) {
-      return res.status(404).json({
-        message: "Listing not found",
-      });
+    const listings = await Listing.find( {isApproved: true} );
+    
+    if (listings.length === 0) {
+      return res.status(404).json({ message: "No approved listings found" });
     }
 
-    // Return the found listing
-    res.status(200).json({
-      message: "Listing retrieved successfully",
-      listing,
-    });
+    res.status(200).json({listings});
   } catch (error) {
-    // Handle any errors that occur
-    res.status(500).json({
-      message: "Error fetching listing",
-      error,
-    });
+    console.error(error);
+    res.status(500).json({ message: "An error occurred while fetching approved listings" });
   }
 });
 
 
-
 listingRouter.post("/add-listing",trainerAuthMiddleware,async function (req, res) {
     const inputFromTrainer = {
-      trainerId: res.trainerId,
+      trainerId: req.trainerId,
       category: req.body.category,
       title: req.body.title,
       price: req.body.price,
@@ -105,7 +83,9 @@ listingRouter.post("/add-listing",trainerAuthMiddleware,async function (req, res
       gender: req.body.gender,
       startTime: req.body.startTime,
       endTime: req.body.endTime,
-      ageGroup: req.body.ageGroup,
+      // ageGroup: req.body.ageGroup,
+      minAge: req.body.minAge,
+      maxAge: req.body.maxAge,
       description: req.body.description,
     };
     const result = getListingSchema.safeParse(inputFromTrainer);
@@ -126,7 +106,7 @@ listingRouter.post("/add-listing",trainerAuthMiddleware,async function (req, res
         });
       }
 
-      const listing = await Listing.create(inputFromTrainer);
+      const listing = await Listing.create(inputFromTrainer, );
       const token = jwt.sign(
         {
           listingId: listing._id,
@@ -136,7 +116,6 @@ listingRouter.post("/add-listing",trainerAuthMiddleware,async function (req, res
       res.status(200).json({
         message: "list created successfully",
         token: token,
-        listingId: listing._id
       });
     } catch (error) {
       res.status(411).json({

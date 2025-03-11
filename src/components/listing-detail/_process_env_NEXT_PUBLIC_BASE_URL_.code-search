@@ -1,0 +1,284 @@
+# Query: ${process.env.NEXT_PUBLIC_BASE_URL}
+# ContextLines: 1
+
+63 results - 34 files
+
+.env.local:
+  2  
+  3: NEXT_PUBLIC_BASE_URL=${process.env.NEXT_PUBLIC_BASE_URL}
+  4  
+
+backend/routes/orderRouter.js:
+   39          try {
+   40:           const listingResponse = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${order.listingId}`);
+   41            const { price } = listingResponse.data.listing;
+
+  103          try {
+  104:           const listingResponse = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${order.listingId}`);
+  105            const { price } = listingResponse.data.listing;
+
+  171      try {
+  172:       const listingResponse = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${orderObj.listingId}`);
+  173        const { price, title } = listingResponse.data.listing;
+
+src/app/(service)/locationService.ts:
+  5      // Fetch the place name as a string from your API
+  6:     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/66daf615d126a0a164db5965`);
+  7  
+
+src/app/dashboard/teacher/[id]/page.tsx:
+  44          const response = await axios.get(
+  45:           `${process.env.NEXT_PUBLIC_BASE_URL}/trainers/` + id.toString()
+  46          );
+
+src/app/newForm/page.tsx:
+  28        try {
+  29:         const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/trainers/`);
+  30          setTrainers(response.data);
+
+src/app/trainer/show_my_listings/[id]/page.tsx:
+  27          const response = await axios.get(
+  28:           `${process.env.NEXT_PUBLIC_BASE_URL}/listing/getListingsByTrainerId/` + id
+  29          );
+
+  47              const response = await axios.get(
+  48:               `${process.env.NEXT_PUBLIC_BASE_URL}/user/enrolled/${listing._id}`
+  49              );
+
+src/app/userflow/familyMembers/page.tsx:
+   61          const res = await axios.get(
+   62:           `${process.env.NEXT_PUBLIC_BASE_URL}/user/allmembers`,
+   63            {
+
+  121        const response = await axios.put(
+  122:         `${process.env.NEXT_PUBLIC_BASE_URL}/user/members/${currentMember._id}`,
+  123          updatedInfo,
+
+src/app/userflow/orderdetails/[id]/page.tsx:
+  37            try {
+  38:             const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/order/getOrderDetailsByOrderId/` + id.toString());
+  39              
+
+src/app/userflow/orders/[id]/page.tsx:
+  29            try {
+  30:             const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/order/getOrdersDetailsByUserId/` + id.toString());
+  31              const fetchedOrders = response.data.orders.map((order: any) => ({
+
+src/app/userflow/registerMember/page.tsx:
+  47      try {
+  48:       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/registerMember`, data, {
+  49          headers: {
+
+src/components/admin-dashboard/OrderStatus.tsx:
+  25        try {
+  26:         const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/order/getAllOrders/`);
+  27          const fetchedOrders = response.data.orders.map((order: any) => ({
+
+  47      try {
+  48:       await axios.put(`${process.env.NEXT_PUBLIC_BASE_URL}/order/updateOrderStatus`, {
+  49          orderId,
+
+src/components/admin-dashboard/listing/AdminListings.tsx:
+  50  const handleDelete = async(listingId:string,listingTitle:string) =>{
+  51:   const response = await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/discard-listing/`+ listingId.toString());
+  52    //  console.log(response.data);
+
+  65          const response = await axios.get(
+  66:           `${process.env.NEXT_PUBLIC_BASE_URL}/admin/listings`
+  67          );
+
+src/components/admin-dashboard/pendings/PendingDetails.tsx:
+  38   const handleRejectTrainer = async (trainerID:string,trainerEmail:string) => {
+  39:    const response = await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/discard-trainer/`+ trainerID.toString());
+  40    //  console.log(response.data);
+
+  45      // console.log(trainerID);
+  46:     const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/approve-trainer/`+ trainerID.toString());
+  47      // console.log(response.data);
+
+  52   const handleRejectListing = async (listingId:string,listingTitle:string) => {
+  53:   const response = await axios.delete(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/discard-listing/`+ listingId.toString());
+  54    //  console.log(response.data);
+
+  60    // console.log(listingId);
+  61:   const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/approve-listing/`+ listingId.toString());
+  62    // console.log(response.data);
+
+  68      try {
+  69:       const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/pending-trainers`);
+  70:       const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/admin/pending-listings`);
+  71        // console.log(response.data.pendingTrainers);
+
+src/components/admin-dashboard/trainers/Trainers.tsx:
+  60      const response = await axios.delete(
+  61:       `${process.env.NEXT_PUBLIC_BASE_URL}/admin/discard-trainer/` +
+  62          trainerID.toString()
+
+  79          const response = await axios.get(
+  80:           `${process.env.NEXT_PUBLIC_BASE_URL}/admin/trainers`
+  81          );
+
+src/components/approved-trainer-list/Main.tsx:
+  25        try {
+  26:         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/approved-trainers/`); // API route for fetching trainers
+  27          const data = await response.json();
+
+src/components/checkout/CheckoutPage.tsx:
+  102        const response = await axios.post(
+  103:         `${process.env.NEXT_PUBLIC_BASE_URL}/order/checkout`,
+  104          values,
+
+  138          const response = await axios.get(
+  139:           `${process.env.NEXT_PUBLIC_BASE_URL}/user/getUserById/${userId}`,
+  140            {
+
+  164          const response = await axios.get(
+  165:           `${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${listingId}`
+  166          );
+
+  182          const response = await axios.get(
+  183:           `${process.env.NEXT_PUBLIC_BASE_URL}/user/members/${memberId}`,
+  184            {
+
+src/components/favoritesComp/fav.tsx:
+  39  
+  40:         const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/favorites/${userId}`, {
+  41            headers: { Authorization: `Bearer ${token}` },
+
+  61          const detailsPromises = favoriteIds.map(id =>
+  62:           axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${id}`) // Fetch details for each listing ID
+  63          );
+
+src/components/listing/ListingCard.tsx:
+   94        try {
+   95:         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/favorites/${userId}`, {
+   96            method: 'GET',
+
+  132    try {
+  133:     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/favorites`, {
+  134        method: newIsSelected ? 'POST' : 'DELETE',
+
+src/components/listing/ListingsPage.tsx:
+  40      useEffect(()=>{
+  41:         axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/bulk?filter=${keywords || selectedCategories }`).then((res)=>{
+  42            setListings( res.data);
+
+  46    //   useEffect(()=>{
+  47:   //     axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/bulk?filter=${keywords || selectedCategories }`).then((res)=>{
+  48    //       setListings( res.data);
+
+src/components/listing-detail/ListingDetail.tsx:
+  59          const response = await axios.get(
+  60:           `${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${id}`
+  61          );
+
+  74          const response = await axios.get(
+  75:           `${process.env.NEXT_PUBLIC_BASE_URL}/trainers/` + form.trainerId.toString()
+  76          );
+
+src/components/listing-detail/MainDetailPage.tsx:
+  50        try {
+  51:         const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/favorites/${userId}`, {
+  52            method: 'GET',
+
+  88    try {
+  89:     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/favorites`, {
+  90        method: newIsSelected ? 'POST' : 'DELETE',
+
+src/components/listing-detail/Reviews.tsx:
+  17    useEffect(() => {
+  18:     fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/review/reviews`)
+  19        .then((res) => res.json())
+
+src/components/listing-detail/SideLayout.tsx:
+  30      const fetchUserName = async () => {
+  31:       const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/user/username", {
+  32          headers: {
+
+  38      const fetchMembers = async () => {
+  39:       const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/user/allmembers`, {
+  40          headers: {
+
+  57  
+  58:     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/review/reviews`, {
+  59        method: "POST",
+
+  78        try {
+  79:         const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/enroll`, {
+  80            listingId, 
+
+src/components/trainer-dashboard/form.tsx:
+   94        };
+   96        const userResponse = await axios.post(
+   97:         `${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`,
+   98          payload,
+
+  123        
+  124:       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/trainers/signup", trainerPayload);
+  125  
+
+src/components/trainer-dashboard/TeacherProfile.tsx:
+  49          const response = await axios.get(
+  50:           `${process.env.NEXT_PUBLIC_BASE_URL}/trainers/` + id.toString()
+  51          );
+
+src/components/trainer-dashboard/ui/organizationForm.tsx:
+  69      try {
+  70:       const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/organizations/signup`, values);
+  71        console.log("Organization added" + response.data);
+
+src/components/UserFlow/AddListing.tsx:
+  139          const response = await axios.post(
+  140:           `${process.env.NEXT_PUBLIC_BASE_URL}/listing/add-listing`,
+  141            values,
+
+  165          const response = await axios.put(
+  166:           `${process.env.NEXT_PUBLIC_BASE_URL}/listing/add-listing/${id}`,
+  167            values,
+
+  249            const response = await axios.get(
+  250:             `${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${id}`,
+  251              {
+
+src/components/UserFlow/GoogleAuth.tsx:
+   9          try {
+  10:           const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/google-auth`, {
+  11              email,
+
+src/components/UserFlow/LoginCard.tsx:
+  23      try {
+  24:       const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/signin`, {
+  25          email,
+
+src/components/UserFlow/MyOrders.tsx:
+  26            try {
+  27:             const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/order/getOrdersByUserId/` + userId.toString());
+  28              console.log(id);
+
+src/components/UserFlow/Preview.tsx:
+  25          const response = await axios.get(
+  26:           `${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/${id}`
+  27          );
+
+  58        const response = await axios.delete(
+  59:         `${process.env.NEXT_PUBLIC_BASE_URL}/listing/deleteListingById/${listingId}`,
+  60          {
+
+src/components/UserFlow/RoleBasedNav.tsx:
+  26      
+  27:     axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/user/username`, {
+  28        headers: {
+
+  43      if (trainerId) { // Ensure trainerId is set before making the API call
+  44:       axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/trainers/${trainerId}`)
+  45          .then((res) => {
+
+src/components/UserFlow/SignUpcard.tsx:
+  24      try {
+  25:       const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`, {
+  26          email,
+
+src/components/UserFlow/UserDashboard.tsx:
+  15        try {
+  16:         const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/user/username`, {
+  17            headers: {

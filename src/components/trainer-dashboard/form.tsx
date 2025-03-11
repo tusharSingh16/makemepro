@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { useState } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/trainer-dashboard/ui/radio-group";
 import { Button } from "@/components/trainer-dashboard/ui/button";
 import {
   Form,
@@ -16,12 +15,15 @@ import {
   FormMessage,
 } from "@/components/trainer-dashboard/ui/form";
 import { Input } from "@/components/trainer-dashboard/ui/input";
-import { Label } from "./ui/label";
 import Popup from "./PopUp";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Card, CardContent } from './ui/card'
 import Image from 'next/image'
+import { Textarea } from "./ui/textarea";
+import Link from "next/link";
+import UploadImage from "../UserFlow/UploadImage";
 
 export function TrainerForm() {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const formSchema = z.object({
@@ -52,6 +54,15 @@ export function TrainerForm() {
     availability: z.array(z.string()).optional(),
     password: z.string().min(1, {
       message: "Please enter a valid password",
+    }),
+    about: z.string().min(100, {
+      message: "Minimum length required is 100",
+    }),
+    workHistory: z.string().min(100, {
+      message: "Minimum length required is 100",
+    }),
+    educationDetail: z.string().min(50, {
+      message: "Minimum length required is 50",
     })
   });
 
@@ -67,24 +78,71 @@ export function TrainerForm() {
       phone: "",
       address: "",
       availability: [],
-      password: ""
+      password: "",
+      about: "",
+      workHistory: "",
+      educationDetail: ""
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await axios.post("http://localhost:3005/api/v1/trainers/signup", values);
+      const payload = {
+        email: values.email,
+        firstName: values.fname,
+        lastName: values.lname,
+        password: values.password,
+        role: "trainer" // Hardcoding role as 'trainer'
+      };
+      const userResponse = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const userId = userResponse.data._id;
+      const trainerPayload = {
+        _id: userId, // Set _id to be the same as the user _id
+        fname: values.fname,
+        lname: values.lname,
+        qualifications: values.qualifications,
+        linkedin: values.linkedin,
+        experience: values.experience,
+        email: values.email,
+        phone: values.phone,
+        address: values.address,
+        availability: values.availability,
+        password: values.password, // Optional: If you need to store password in Trainer too
+        about: values.about,
+        workHistory: values.workHistory,
+        educationDetail: values.educationDetail,
+        imageUrl
+      };
+
+
+      console.log(trainerPayload);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/trainers/signup`, trainerPayload);
+
+
+      console.log(userResponse.data);
       console.log("Trainer added" + response.data)
       setPopupMessage("Trainer added successfully!");
       setPopupVisible(true);
-    } catch (e) {
+    }
+    catch (e) {
       if (axios.isAxiosError(e) && e.response?.status === 409) {
-        setPopupMessage("User already exists!");
+        setPopupMessage("Trainer already exists!");
       } else {
         setPopupMessage("An error occurred. Please try again.");
       }
       setPopupVisible(true);
+
     }
+
   }
 
   return (
@@ -93,194 +151,177 @@ export function TrainerForm() {
         message={popupMessage}
         isOpen={popupVisible}
         onClose={() => setPopupVisible(false)}
+        redirectTo="/"
       />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-1">
-          <div className="grid grid-cols-2 w-full gap-2 max-[769px]:grid-cols-1">
-            <div>
-              <div className="flex gap-2 w-full max-sm:flex-col">
-                <div className="flex w-1/2 max-sm:w-full">
-                  <FormField
-                    name="fname"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem className="w-full">
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter first name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
+          <div className="flex gap-4 w-full flex-wrap">
+            <div className="flex flex-col w-full gap-4">
+              <div className="flex gap-4 w-full max-sm:flex-col">
+                <div className="w-1/2 max-sm:w-full">
+                  <FormField name="fname" control={form.control} render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-lg" >First Name</FormLabel >
+                      <FormControl>
+                        <Input placeholder="Enter first name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
-                <div className="flex w-1/2 max-sm:w-full">
-                  <FormField
-                    name="lname"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem className=" w-full">
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter last name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="w-1/2 max-sm:w-full">
+                  <FormField name="lname" control={form.control} render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-lg" >Last Name</FormLabel >
+                      <FormControl>
+                        <Input placeholder="Enter last name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
               </div>
-              <FormField
-                name="qualifications"
-                control={form.control}
-                render={({ field }) => (
+              <div className="w-full">
+                <UploadImage imageUrl={imageUrl} setImageUrl={setImageUrl} />
+              </div>
+
+              <div>
+                <FormField name="qualifications" control={form.control} render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Qualifications</FormLabel>
+                    <FormLabel className="text-lg" >Qualifications</FormLabel >
                     <FormControl>
                       <Input placeholder="Qualification" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                name="email"
-                control={form.control}
-                render={({ field }) => (
+                )} />
+              </div>
+
+              <div>
+                <FormField name="email" control={form.control} render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel className="text-lg" >Email Address</FormLabel >
                     <FormControl>
                       <Input placeholder="Enter your email address" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                name="password"
-                control={form.control}
-                render={({ field }) => (
+                )} />
+              </div>
+
+              <div>
+                <FormField name="password" control={form.control} render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-lg" >Password</FormLabel >
                     <FormControl>
                       <Input type="password" placeholder="Enter your password" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                )} />
+              </div>
 
-              <FormField
-                name="phone"
-                control={form.control}
-                render={({ field }) => (
+              <div>
+                <FormField name="phone" control={form.control} render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
+                    <FormLabel className="text-lg" >Mobile Number</FormLabel >
                     <FormControl>
                       <Input type="tel" placeholder="Enter your mobile number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
-              <FormField
-                name="experience"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Teaching Experience</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Enter your teaching experience in years" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                name="linkedin"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>LinkedIn Profile</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your LinkedIn profile link" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div>
-              <div className='flex justify-center'>
-                <Card className="w-full">
-                  <CardContent className='h-full pt-2 w-full '>
-                    <div className='w-full flex justify-center'>
-                      <Image src={'/img/profile.png'}
-                        alt='map'
-                        width={150}
-                        height={150}
-                      />
-                    </div>
-                    <div className='py-2 flex text-xs w-full justify-center'>Upload your photo</div>
-                    <Button className=' w-full' size={'sm'} type='button' variant={'outline'}>Select from Computer</Button>
-                  </CardContent>
-                </Card>
+                )} />
               </div>
-              <FormField
-                name="address"
-                control={form.control}
-                render={({ field }) => (
+            </div>
+
+            <div className="flex flex-col w-full gap-4">
+
+              <div>
+                <FormField name="experience" control={form.control} render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel className="text-lg" >Teaching Experience</FormLabel >
+                    <FormControl>
+                      <Input type="number" placeholder="Enter experience in years" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              <div>
+                <FormField name="linkedin" control={form.control} render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-lg" >LinkedIn Profile</FormLabel >
+                    <FormControl>
+                      <Input placeholder="Enter LinkedIn profile link" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+
+              <div>
+                <FormField name="address" control={form.control} render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-lg" >Address</FormLabel >
                     <FormControl>
                       <Input placeholder="Enter your address" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                )} />
+              </div>
+            </div>
+          </div>
 
-              {/* <Card>
-                <CardHeader>
-                  <CardTitle>
-                    See near your location
-                  </CardTitle>
-                  <CardDescription>Northern Street, Chicago, United States</CardDescription>
-                </CardHeader>
-                <CardContent>
-
-                  <Image src={'/img/basemap.png'}
-                    alt='map'
-                    width={300}
-                    height={200}
-                  />
-                </CardContent>
-              </Card> */}
-
-              {/* <FormField
-                name="availability"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Availability</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter your availability" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-              {/* <JobDetailForm /> */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <FormField name="about" control={form.control} render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-lg" >About</FormLabel >
+                  <FormControl>
+                    <Textarea placeholder="Tell us about yourself..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
             </div>
 
+            <div>
+              <FormField name="workHistory" control={form.control} render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-lg" >Your Work History</FormLabel >
+                  <FormControl>
+                    <Textarea placeholder="Share your work history..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
+
+            <div>
+              <FormField name="educationDetail" control={form.control} render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-lg" >Education Details</FormLabel >
+                  <FormControl>
+                    <Textarea placeholder="Enter your Education Details..." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
           </div>
+
           <div className="flex justify-between py-4">
-            <Button variant={"outline"} type="button">Cancel</Button>
+            <Link href="/">
+              <Button variant="outline" type="button">Cancel</Button>
+            </Link>
             <Button type="submit">Submit Details</Button>
           </div>
         </form>
       </Form>
+
     </div>
   );
 }

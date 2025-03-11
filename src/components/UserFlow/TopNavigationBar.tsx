@@ -7,7 +7,7 @@ const TopNavigationBar = () => {
      
       <div
         className="absolute inset-0 bg-cover bg-center z-0"
-        style={{ backgroundImage: `url('/images/background-image.png')` }}
+        // style={{ backgroundImage: `url('/images/background-image.png')` }}
       ></div>
 
       <NavBar></NavBar>

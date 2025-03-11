@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const reviewSchema = new mongoose.Schema({
   name: String,
@@ -7,6 +7,5 @@ const reviewSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
 });
 
- const Review = mongoose.model('Review', reviewSchema);
-
-module.exports = Review;
+// Export the model only if it hasn't already been compiled
+module.exports = mongoose.models.Review || mongoose.model("Review", reviewSchema);

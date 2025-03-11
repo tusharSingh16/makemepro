@@ -9,6 +9,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "noImplicitAny": false,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
@@ -19,8 +20,16 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "target": "ES2017"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/components/listing-detail/SideLayout.jsx",
+    "src/components/listing-detail/SideLayout.jsx"
+  ],
   "exclude": ["node_modules"]
 }

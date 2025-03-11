@@ -7,17 +7,29 @@ const config = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
+  ],
   prefix: "",
+  
   theme: {
     container: {
       center: true,
       padding: "2rem",
       screens: {
         "2xl": "1400px",
+        "xl": "1280px", // Ensure good size for large screens
+        "lg": "1024px", // Adjust screen sizes
+        "md": "768px",  // For smaller screens
+        "sm": "640px",  // Smallest screens
       },
     },
     extend: {
+      fontFamily: {
+        inter: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        '3xl': '0px 0px 20px 0px rgba(0, 0, 0, 0.1)',
+        '4xl': '-8px 8px 10px 0px rgba(0, 0, 0, 0.1)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -72,9 +84,13 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      // Adding custom spacing if required for fixed navbar adjustments
+      spacing: {
+        navbar: "80px", // Custom navbar height for spacing adjustments
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+}
 
 export default config
