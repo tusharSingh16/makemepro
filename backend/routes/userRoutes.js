@@ -7,6 +7,8 @@ const { User } = require("../models/user");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const Member = require("../models/Member");
 const sendEmail = require("../utils/sendEmail");
+const { sendWelcomeEmail, sendVerificationEmail } = require("../config/email");
+const PendingUser = require("../models/PendingUser");
 
 const userRouter = express.Router();
 
@@ -101,46 +103,80 @@ userRouter.post("/signup", async function (req, res) {
     const isValid = await User.findOne({
       email: inputFromUser.email,
     });
+
     if (isValid) {
       return res.status(411).json({
-        message: "Email already taken 2 /Incorrect inputs",
+        message: "Email already taken /Incorrect inputs",
       });
     }
-
-    const user = await User.create(inputFromUser);
-    const token = jwt.sign(
-      {
-        userId: user._id,
-        role: user.role,
-      },
-      JWT_SECRET
-    );
-
-    await sendEmail(
-      user.email,
-      "Account Registration",
-      `Hello ${user.FirstName}, \n\nYou have successfully registered ${inputFromUser.firstName} into your training horizon.`,
-      `<p>Hello ${user.FirstName},</p><p>You have successfully registered <b>${inputFromUser.firstName}</b>into your training horizon account.</p>`
-    );
-
-    // member email not available yet!!
-    // await sendEmail(
-    //   inputFromUser.email,
-    //   'Member Registeration',
-    //   `Hello ${inputFromUser.firstName}, \n\nYou have successfully been registered by ${user.FirstName} as a member into their training horizon account.`
-    // );
-
-    res.status(200).json({
-      message: "User created successfully",
-      token: token,
-      _id: user._id,
-    });
+    // generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    await PendingUser.create({
+      firstName: inputFromUser.firstName,
+      lastName: inputFromUser.lastName,
+      password: inputFromUser.password,
+      role: inputFromUser.role,
+      email: inputFromUser.email,
+      otp: otp,
+      otpExpiry: Date.now() + 600000, // 10 minutes from now
+    })
+    await sendVerificationEmail(inputFromUser.email, otp);
+    res.status(200).json({ message: "Verification email sent. Please check your inbox." });
   } catch (error) {
     res.status(411).json({
-      message: error,
+      message: "Error in signup route" + error,
     });
   }
 });
+
+userRouter.post("/verify-email", async (req, res)=> {
+  const {email, otp} = req.body;
+
+  try {
+    const pendingUser = await PendingUser.findOne({email});
+    if(!pendingUser)  {
+      return res.status(411).json({
+        message: "Email not found in Pending users. Sign Up again",
+        });
+    }
+    if(pendingUser.otp != otp.toString()) {
+      // await PendingUser.deleteOne({
+      //   email: email,
+      //   })
+      return res.status(411).json({
+        message: "Invalid OTP, Please try again",
+      });
+    }
+    if(pendingUser.otpExpiry < Date.now())  { // date has gone beyond the permissible limit
+      // delete the pemding user
+      await PendingUser.deleteOne({
+        email: email,})
+      return res.json({
+        message: "OTP has expired. Please sign up again",
+      })
+    }
+    // create the user when all checks have passed
+    const user = await User.create({
+      firstName: pendingUser.firstName,
+      lastName: pendingUser.lastName,
+      password: pendingUser.password,
+      role: pendingUser.role,
+      email: pendingUser.email,
+    })
+    await sendWelcomeEmail(user.email, user.firstName);
+    const token = await jwt.sign({userID: user._id, role:user.role}, JWT_SECRET);
+    await PendingUser.deleteOne({
+      email: email,
+      })
+      res.status(200).json({
+        message: "User created successfully",
+        token,
+        _id: user._id,
+        });
+  } catch (error) {
+    
+  }
+})
 
 userRouter.post("/signin", async function (req, res) {
   const userInput = {
