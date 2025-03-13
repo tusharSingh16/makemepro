@@ -100,13 +100,13 @@ userRouter.post("/signup", async function (req, res) {
     });
   }
   try {
-    const isValid = await User.findOne({
+    const emailAlreadyExist = await User.findOne({
       email: inputFromUser.email,
     });
 
-    if (isValid) {
+    if (emailAlreadyExist) {
       return res.status(411).json({
-        message: "Email already taken /Incorrect inputs",
+        message: "Email already taken.",
       });
     }
     // generate OTP
@@ -120,6 +120,7 @@ userRouter.post("/signup", async function (req, res) {
       otp: otp,
       otpExpiry: Date.now() + 600000, // 10 minutes from now
     })
+    console.log("Pending user created and otp is "+otp);
     await sendVerificationEmail(inputFromUser.email, otp);
     res.status(200).json({ message: "Verification email sent. Please check your inbox." });
   } catch (error) {
@@ -130,6 +131,7 @@ userRouter.post("/signup", async function (req, res) {
 });
 
 userRouter.post("/verify-email", async (req, res)=> {
+
   const {email, otp} = req.body;
 
   try {
@@ -139,22 +141,31 @@ userRouter.post("/verify-email", async (req, res)=> {
         message: "Email not found in Pending users. Sign Up again",
         });
     }
-    if(pendingUser.otp != otp.toString()) {
-      // await PendingUser.deleteOne({
-      //   email: email,
-      //   })
-      return res.status(411).json({
-        message: "Invalid OTP, Please try again",
+    if (pendingUser.otp !== otp.toString()) {
+      pendingUser.otpAttempts += 1;
+
+      if (pendingUser.otpAttempts >= 3) {
+        await PendingUser.deleteOne({ _id: pendingUser._id });
+        return res.status(411).json({
+          message: "Too many attempts. Please sign up again.",
+        });
+      }
+
+      await pendingUser.save();
+      return res.status(400).json({
+        message: "Invalid OTP. Try again.",
       });
     }
-    if(pendingUser.otpExpiry < Date.now())  { // date has gone beyond the permissible limit
+    if(pendingUser.otpExpiry < Date.now())  { // when date has gone beyond the permissible limit
       // delete the pemding user
-      await PendingUser.deleteOne({
-        email: email,})
+      // await PendingUser.deleteOne({
+      //   email: email,})
       return res.json({
-        message: "OTP has expired. Please sign up again",
+        message: "OTP has expired. Please resend otp again",
       })
     }
+    console.log("Otp entered is: ", otp);
+    console.log("Otp in db is: ", pendingUser.otp);
     // create the user when all checks have passed
     const user = await User.create({
       firstName: pendingUser.firstName,
@@ -163,6 +174,7 @@ userRouter.post("/verify-email", async (req, res)=> {
       role: pendingUser.role,
       email: pendingUser.email,
     })
+    console.log("User created")
     await sendWelcomeEmail(user.email, user.firstName);
     const token = await jwt.sign({userID: user._id, role:user.role}, JWT_SECRET);
     await PendingUser.deleteOne({
@@ -174,7 +186,7 @@ userRouter.post("/verify-email", async (req, res)=> {
         _id: user._id,
         });
   } catch (error) {
-    
+    console.log("Error in creating user", error);
   }
 })
 
@@ -192,6 +204,11 @@ userRouter.post("/signin", async function (req, res) {
   }
 
   try {
+    const pendingUser = await PendingUser.findOne({ email });
+    if (pendingUser) {
+      return res.status(400).json({ message: "Please verify your email before logging in." });
+    }
+
     const user = await User.findOne({
       email: userInput.email,
       password: userInput.password,
@@ -225,6 +242,28 @@ userRouter.post("/signin", async function (req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+userRouter.post("/resend-otp", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const pendingUser = await PendingUser.findOne({ email });
+    if (!pendingUser) {
+      return res.status(400).json({ message: "User not found. Please sign up." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    pendingUser.otp = otp;
+    pendingUser.otpExpiry = Date.now() + 10 * 60 * 1000;
+    await pendingUser.save();
+
+    await sendVerificationEmail(email, otp);
+    res.status(200).json({ message: "New OTP sent successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to resend OTP" });
+  }
+});
+
 
 userRouter.put("/", authMiddleware, async function (req, res) {
   const userInput = req.body;
