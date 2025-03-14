@@ -116,7 +116,8 @@ export default function TopCourses() {
   }, [listings]);
 
   const getRandomListings = (listings: Listing[], count: number) => {
-    const shuffled = [...listings].sort(() => Math.random() - 0.5);
+    const shuffled = [...listings].sort((a, b) => b.avgRating - a.avgRating) // Sort by avgRating (highest first)
+      .slice(0, count);
     return shuffled.slice(0, count);
   };
 

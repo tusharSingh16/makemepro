@@ -8,7 +8,7 @@ interface Listing {
   category: string;
   subcategory: string;
   title: string;
-  imageUrl:string;
+  imageUrl: string;
   priceMode: string;
   price: string;
   mode: string;
@@ -115,9 +115,9 @@ const FavoriteListingIds = () => {
                   description={""}
                   avgRating={listing.avgRating}
                   isFavorite={true} // Indicate that this listing is a favorite
-                />
+                  isSponsored={false} sponsoredAmount={0} />
               ))
-             ) : (
+            ) : (
               <p className="text-xl my-10 font-bold">NO LISTING FOUND</p>
             )}
           </div>
