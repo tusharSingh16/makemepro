@@ -34,6 +34,9 @@ interface Listing {
   listingId: string
   isFavorite: boolean
   avgRating: number
+  isSponsored: boolean
+  sponsoredAmount: number
+  createdAt: string
 }
 
 // Skeleton card component to reuse
@@ -124,6 +127,15 @@ const ListingsPage: React.FC<{
 
       try {
         const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/listing/listing/?${query}`);
+
+        // Sort listings before setting state
+        const sortedListings = data.sort((a: Listing, b: Listing) => {
+          if (b.isSponsored !== a.isSponsored) return b.isSponsored ? 1 : -1; // Sponsored first
+          if (b.sponsoredAmount !== a.sponsoredAmount) return b.sponsoredAmount - a.sponsoredAmount; // Higher amount first
+          if (b.avgRating !== a.avgRating) return b.avgRating - a.avgRating; // Higher rating first
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(); // Newer first
+        });
+
         setListings(data);
         setFilteredListings(data); // Ensure data is initially set
         handleSearch(); // Apply search filter immediately after fetching data
@@ -190,6 +202,8 @@ const ListingsPage: React.FC<{
                   maxAge={listing.maxAge}
                   description={listing.description}
                   isFavorite={listing.isFavorite}
+                  isSponsored={listing.isSponsored}
+                  sponsoredAmount={listing.sponsoredAmount}
                 />
               ))
             ) : (

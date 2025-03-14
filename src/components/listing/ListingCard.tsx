@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { FaStar } from "react-icons/fa";
 
 interface ListingCardProps {
   category: string;
@@ -36,6 +37,8 @@ interface ListingCardProps {
   categoryName: string;
   subCategoryName: string;
   avgRating: number;
+  isSponsored: boolean;
+  sponsoredAmount: number;
 }
 
 const ListingCard: React.FC<ListingCardProps> = ({
@@ -62,6 +65,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
   isFavorite,
   categoryName,
   subCategoryName,
+  isSponsored,
   avgRating,
 }) => {
   const [isSelected, setIsSelected] = useState<boolean>(isFavorite);
@@ -124,7 +128,7 @@ const ListingCard: React.FC<ListingCardProps> = ({
       }
     };
 
-    const fetchImage = async() => {
+    const fetchImage = async () => {
       try {
         const response2 = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_URL}/upload?imageUrl=${imageUrl}`
@@ -207,16 +211,21 @@ const ListingCard: React.FC<ListingCardProps> = ({
                   className="w-full h-[250px] object-cover rounded-t-lg"
                 />
               )}
-              <Image 
-                src={`${
-                  isSelected ? "/icons/filled_fav.png" : "/icons/fav.png"
-                }`}
+              <Image
+                src={`${isSelected ? "/icons/filled_fav.png" : "/icons/fav.png"
+                  }`}
                 alt="fav"
                 width={25}
                 height={25}
                 onClick={handleOnClick}
                 className="absolute top-4 right-4 bg-gray-100 p-1 rounded-full shadow-md cursor-pointer"
               />
+              {isSponsored && (
+                <div className="absolute top-4 left-4 bg-yellow-400 rounded-full p-1 ring-1 ring-yellow-500">
+                  <FaStar size={18} className=" text-white" />
+                </div>
+              )
+              }
             </div>
 
             <CardContent className="p-6 space-y-6">
@@ -265,8 +274,8 @@ const ListingCard: React.FC<ListingCardProps> = ({
                         {priceMode === "Per day"
                           ? "/day"
                           : priceMode === "Per month"
-                          ? "/month"
-                          : "/course"}
+                            ? "/month"
+                            : "/course"}
                       </span>
                     </span>
                     <Button

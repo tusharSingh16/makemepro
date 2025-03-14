@@ -120,7 +120,7 @@ userRouter.post("/signup", async function (req, res) {
       otp: otp,
       otpExpiry: Date.now() + 600000, // 10 minutes from now
     })
-    console.log("Pending user created and otp is "+otp);
+    console.log("Pending user created and otp is " + otp);
     await sendVerificationEmail(inputFromUser.email, otp);
     res.status(200).json({ message: "Verification email sent. Please check your inbox." });
   } catch (error) {
@@ -130,16 +130,16 @@ userRouter.post("/signup", async function (req, res) {
   }
 });
 
-userRouter.post("/verify-email", async (req, res)=> {
+userRouter.post("/verify-email", async (req, res) => {
 
-  const {email, otp} = req.body;
+  const { email, otp } = req.body;
 
   try {
-    const pendingUser = await PendingUser.findOne({email});
-    if(!pendingUser)  {
+    const pendingUser = await PendingUser.findOne({ email });
+    if (!pendingUser) {
       return res.status(411).json({
         message: "Email not found in Pending users. Sign Up again",
-        });
+      });
     }
     if (pendingUser.otp !== otp.toString()) {
       pendingUser.otpAttempts += 1;
@@ -156,7 +156,7 @@ userRouter.post("/verify-email", async (req, res)=> {
         message: "Invalid OTP. Try again.",
       });
     }
-    if(pendingUser.otpExpiry < Date.now())  { // when date has gone beyond the permissible limit
+    if (pendingUser.otpExpiry < Date.now()) { // when date has gone beyond the permissible limit
       // delete the pemding user
       // await PendingUser.deleteOne({
       //   email: email,})
@@ -176,15 +176,15 @@ userRouter.post("/verify-email", async (req, res)=> {
     })
     console.log("User created")
     await sendWelcomeEmail(user.email, user.firstName);
-    const token = await jwt.sign({userID: user._id, role:user.role}, JWT_SECRET);
+    const token = await jwt.sign({ userID: user._id, role: user.role }, JWT_SECRET);
     await PendingUser.deleteOne({
       email: email,
-      })
-      res.status(200).json({
-        message: "User created successfully",
-        token,
-        _id: user._id,
-        });
+    })
+    res.status(200).json({
+      message: "User created successfully",
+      token,
+      _id: user._id,
+    });
   } catch (error) {
     console.log("Error in creating user", error);
   }
@@ -204,7 +204,7 @@ userRouter.post("/signin", async function (req, res) {
   }
 
   try {
-    const pendingUser = await PendingUser.findOne({ email });
+    const pendingUser = await PendingUser.findOne({ email: userInput.email });
     if (pendingUser) {
       return res.status(400).json({ message: "Please verify your email before logging in." });
     }
@@ -274,7 +274,7 @@ userRouter.put("/", authMiddleware, async function (req, res) {
       message: "Error while updating information",
     });
   }
-  
+
   try {
     // console.log(" is it correct ?"+res.userId);
     await User.updateOne({ _id: req.userId }, { $set: userInput });

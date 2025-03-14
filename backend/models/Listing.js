@@ -26,7 +26,7 @@ const listingSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  priceMode:{
+  priceMode: {
     type: String
   },
   price: {
@@ -35,14 +35,14 @@ const listingSchema = new mongoose.Schema({
   mode: {
     type: String,
   },
-  location:{
+  location: {
     type: String
   },
   quantity: {
     type: String,
     // required:true,
   },
-  classSize:{
+  classSize: {
     type: String,
   },
   startDate: {
@@ -72,10 +72,10 @@ const listingSchema = new mongoose.Schema({
     type: String,
     // required:true,
   },
-  minAge:{
+  minAge: {
     type: String
   },
-  maxAge:{
+  maxAge: {
     type: String
   },
   preRequistes: {
@@ -86,18 +86,27 @@ const listingSchema = new mongoose.Schema({
     required: true,
     minlength: 100
   },
-  avgRating:{
+  avgRating: {
     type: Number,
     default: 0,
   },
-  
   isApproved: { type: Boolean, default: false },
   reviews: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Review",
     },
-    ],
+  ],
+  isSponsored: {
+    type: Boolean,
+    default: false
+  },
+  sponsoredAmount: {
+    type: Number,
+    default: 0
+  },
+}, {
+  timestamps: true
 });
 
 // Export the model only if it hasn't already been compiled

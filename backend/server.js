@@ -19,7 +19,7 @@ connectDB();
 // app.use('/api/v1' , trainer_router)
 app.use("/api/v1", rootRouter);
 
-app.get('/',  (req, res)=>  {
+app.get('/', (req, res) => {
   console.log("Welocome to training horizon");
   res.json({
     msg: "Welocome to training horizon"

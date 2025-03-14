@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -16,21 +16,18 @@ const transporter = nodemailer.createTransport({
  * @param {string} subject - Email subject
  * @param {string} htmlContent - Email body in HTML format
  */
-
 async function sendEmail(to, subject, htmlContent) {
-  return await transporter.sendMail({
-    from: "contactdeep01@gmail.com",
-    to,
-    subject,
-    html: htmlContent, 
-  })
-  .then(info => {
+  try {
+    const info = await transporter.sendMail({
+      from: "contactdeep01@gmail.com",
+      to,
+      subject,
+      html: htmlContent,
+    });
     console.log("Email sent: %s", info.messageId);
-  })
-  .catch(console.error);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 }
 
-export default sendEmail;
-
-
-
+module.exports = sendEmail;
