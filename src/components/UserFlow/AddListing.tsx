@@ -70,7 +70,8 @@ export function AddListing() {
     endTime: z.string().optional(),
     minAge: z.string(),
     maxAge: z.string(),
-    preRequistes: z.string(),
+    preRequisites: z.array(z.string()),
+    level: z.string(),
     description: z.string().min(100, {
       message: "Enter atleast 100 characters",
     }),
@@ -82,6 +83,8 @@ export function AddListing() {
       quantity: "",
       startTime: "",
       endTime: "",
+      preRequisites: [],
+      level: "",
     },
   });
 
@@ -109,6 +112,7 @@ export function AddListing() {
   const mode = ["Offline", "Online"] as const;
   const priceMode = ["Per month", "Per Course"] as const;
   const classSize = ["Group", "1 to 1"] as const;
+  const levels = ["Beginner", "Intermediate", "Advanced", "All Levels"] as const;
   const dayOptions = [
     { value: "Mon", label: "Mon" },
     { value: "Tue", label: "Tue" },
@@ -117,6 +121,36 @@ export function AddListing() {
     { value: "Fri", label: "Fri" },
     { value: "Sat", label: "Sat" },
     { value: "Sun", label: "Sun" },
+  ];
+
+  const preRequisiteOptions = [
+    // Physical Requirements
+    { value: "Basic Fitness Level", label: "Basic Fitness Level" },
+    { value: "Good Physical Health", label: "Good Physical Health" },
+    { value: "Medical Clearance Required", label: "Medical Clearance Required" },
+    { value: "Physical Assessment Required", label: "Physical Assessment Required" },
+    
+    // Experience Level
+    { value: "No Prior Experience Needed", label: "No Prior Experience Needed" },
+    { value: "Basic Knowledge Required", label: "Basic Knowledge Required" },
+    { value: "Prior Experience Required", label: "Prior Experience Required" },
+    { value: "Skill Assessment Required", label: "Skill Assessment Required" },
+    
+    // Equipment & Attire
+    { value: "Own Equipment Required", label: "Own Equipment Required" },
+    { value: "Specific Attire Required", label: "Specific Attire Required" },
+    { value: "Equipment Provided", label: "Equipment Provided" },
+    
+    // Academic/Learning
+    { value: "Basic Reading/Writing", label: "Basic Reading/Writing" },
+    { value: "Language Proficiency", label: "Language Proficiency" },
+    { value: "Placement Test Required", label: "Placement Test Required" },
+    
+    // Other Requirements
+    { value: "Parent/Guardian Consent", label: "Parent/Guardian Consent" },
+    { value: "Insurance Required", label: "Insurance Required" },
+    { value: "Registration/Membership Required", label: "Registration/Membership Required" },
+    { value: "Trial Class Mandatory", label: "Trial Class Mandatory" }
   ];
 
   const inputRef = useRef<google.maps.places.SearchBox | null>(null);
@@ -139,6 +173,7 @@ export function AddListing() {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [popUpMessage, setPopUpMessage] = useState("");
+  const [selectedPreRequistes, setSelectedPreRequistes] = useState<string[]>([]);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_MAPS_API_KEY!,
@@ -318,6 +353,8 @@ export function AddListing() {
             endTime: listingData.endTime || "",
             minAge: listingData.minAge || "",
             maxAge: listingData.maxAge || "",
+            preRequisites: listingData.preRequisites || [],
+            level: listingData.level || "",
             description: listingData.description || "",
           });
         } catch (error) {
@@ -835,17 +872,54 @@ export function AddListing() {
             )}
           />
           <FormField
-            name="preRequistes"
+            name="preRequisites"
             control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Pre-Requistes</FormLabel>
+                <FormLabel>Pre-Requisites</FormLabel>
                 <FormControl>
-                  <Input
+                  <MultiSelect
                     className="border-gray-600"
-                    {...field}
-                    value={field.value ?? ""}
+                    options={preRequisiteOptions}
+                    onValueChange={(newPreRequistes) => {
+                      setSelectedPreRequistes(newPreRequistes);
+                      field.onChange(newPreRequistes);
+                    }}
+                    defaultValue={selectedPreRequistes}
+                    placeholder="Select or type your own pre-requisites"
+                    isCreatable={true}
                   />
+                </FormControl>
+                <FormMessage className="text-xs text-gray-500">
+                  Select from the list or type your own pre-requisites and press enter
+                </FormMessage>
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="level"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Level</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}>
+                    <SelectTrigger className="w-full border-gray-600">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Level</SelectLabel>
+                        {levels.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -932,7 +1006,10 @@ export function AddListing() {
                     <strong>Age Group:</strong> {formValues.maxAge}
                   </div>
                   <div className="flex justify-between">
-                    <strong>Pre-Requistes:</strong> {formValues.preRequistes}
+                    <strong>Pre-Requisites:</strong> {Array.isArray(formValues.preRequisites) ? formValues.preRequisites.join(", ") : "None"}
+                  </div>
+                  <div className="flex justify-between">
+                    <strong>Level:</strong> {formValues.level}
                   </div>
                   <div className="flex justify-between">
                     <strong>Description:</strong> {formValues.description}

@@ -23,7 +23,7 @@ interface ListingData {
   endTime: string;
   minAge: string;
   maxAge: string;
-  preRequistes: string;
+  preRequisites: string;
   description: string;
 }
 const initialListingData: ListingData = {
@@ -43,7 +43,7 @@ const initialListingData: ListingData = {
   endTime: "",
   minAge: "",
   maxAge: "",
-  preRequistes: "",
+  preRequisites: "",
   description: "",
 };
 
@@ -467,8 +467,8 @@ const Editlisting: React.FC = () => {
             PreRequisites
           </label>
           <textarea
-            name="preRequistes"
-            value={listing?.preRequistes}
+            name="preRequisites"
+            value={listing?.preRequisites}
             onChange={handleChange}
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"></textarea>
         </div>

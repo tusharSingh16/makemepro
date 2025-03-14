@@ -105,7 +105,7 @@ interface Listing {
   endTime: string;
   minAge: string;
   maxAge: string;
-  preRequistes: string;
+  preRequisites: string;
   description: string;
   avgRating: number;
   isApproved: boolean;
