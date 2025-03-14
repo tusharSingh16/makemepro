@@ -1,4 +1,3 @@
-const { useParams } = require('next/navigation');
 const Favorites = require('../models/favorites');
 const {User}  = require('../models/user')
 const express=require("express");
