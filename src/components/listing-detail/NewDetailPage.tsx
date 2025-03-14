@@ -326,11 +326,23 @@ const NewDetailPage: React.FC<ListingId> = ({
       </div>
 
       {/* Schedule */}
-
-      {/* <div>
-      <Calendar year={2025} startDate={listingData.startDate} endDate={listingData.endDate} days={listingData.days} />
-
-      </div> */}
+      <div className="border p-6 h-full rounded-lg shadow-md">
+        <h2 className="text-xl font-bold mb-6 flex items-center">
+          <FaCalendarAlt className="mr-2" />
+          Schedule
+        </h2>
+        <div className="space-y-4">
+          <div className="text-gray-700">
+            <p className="mb-1">Classes will be held on: <span className="font-medium">{formatDays(listingData.days)}</span></p>
+            <p>Time: <span className="font-medium">{listingData.startTime} - {listingData.endTime}</span></p>
+          </div>
+          <Calendar 
+            startDate={listingData.startDate} 
+            endDate={listingData.endDate} 
+            days={listingData.days} 
+          />
+        </div>
+      </div>
 
       {/* Instructor */}
       <div className="border p-4 rounded-lg shadow-md flex flex-col">
