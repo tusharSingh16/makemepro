@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
  * Send an email
  * @param {string} to - Recipient email
  * @param {string} subject - Email subject
- * @param {string} htmlContent - Email body in HTML format
+ * @param {string} htmlContent - Email body in HTML formatx
  */
 async function sendEmail(to, subject, htmlContent) {
   try {

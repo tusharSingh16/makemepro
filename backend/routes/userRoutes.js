@@ -7,7 +7,7 @@ const { User } = require("../models/user");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const Member = require("../models/Member");
 const sendEmail = require("../utils/sendEmail");
-const { sendWelcomeEmail, sendVerificationEmail } = require("../config/email");
+const { sendWelcomeEmail, sendVerificationEmail, sendLoginEmail } = require("../config/email");
 const PendingUser = require("../models/PendingUser");
 
 const userRouter = express.Router();
@@ -208,6 +208,7 @@ userRouter.post("/signin", async function (req, res) {
   try {
     const pendingUser = await PendingUser.findOne({ email: userInput.email});
     if (pendingUser) {
+      console.log("User is pending", pendingUser);
       return res.status(400).json({ message: "Please verify your email before logging in." });
     }
 

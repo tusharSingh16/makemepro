@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import GoogleAuth from "./GoogleAuth";
 import Image from "next/image";
+import OtpVerification from "./OtpVerification";
 
 // Validation Schema
 const signUpSchema = z.object({
@@ -34,35 +35,13 @@ function SignUpCard() {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1); // Step 1: Signup | Step 2: OTP Verification
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [otpAttempts, setOtpAttempts] = useState(0);
-  const [canResendOtp, setCanResendOtp] = useState(true);
-  const [countdown, setCountdown] = useState(30);
 
-  // Start countdown when entering OTP page
-  useEffect(() => {
-    if (step === 2) {
-      setCountdown(30);
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setCanResendOtp(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }
-  }, [step]);
   // the validation function validateInputs() is checking these values immediately after they're set, 
   // but React state updates are asynchronous.
   // hence we add a debounce function to delay the validation function by 300ms
@@ -77,7 +56,7 @@ function SignUpCard() {
   }, [password, confirmPassword]);
 
   // Validate User Input
-  const validateInputs = () => {
+  const validateInputs = useCallback(() => {
     try {
       signUpSchema.parse({ email, firstName, lastName, password, confirmPassword });
       setErrors({});
@@ -94,7 +73,17 @@ function SignUpCard() {
       }
       return false;
     }
-  };
+  }, [email,firstName, lastName, password, confirmPassword]);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (password && confirmPassword) {
+        validateInputs();
+      }
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timer); // Cleanup timeout on dependency change
+  }, [password, confirmPassword, validateInputs]);
 
   const handleSignup = useCallback(async () => {
     if (!validateInputs()) return;
@@ -111,56 +100,6 @@ function SignUpCard() {
     }
     setIsLoading(false);
   }, [email, firstName, lastName, password]);
-  
-
-  // Step 2: Verify OTP & Complete Registration
-  const verifyOtp = async () => {
-    if (!otp) {
-      setErrors({ otp: "Please enter the OTP" });
-      return;
-    }
-    if (otpAttempts >= 3) {
-      setErrors({ otp: "Maximum OTP attempts reached. Please sign up again." });
-      router.push("/");
-      return;
-    }
-  
-    setIsLoading(true);
-    
-    try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/verify-email`, { email, otp });
-  
-      // If OTP is correct, store token and redirect
-      window.localStorage.setItem("token", res.data.token);
-      router.push("/");
-    } catch (error: any) {
-      // If the backend deleted the user (e.g., due to max attempts), handle it
-      if (error.response?.status === 410) {  // Assuming 410 Gone for deleted users
-        setErrors({ otp: "Too many failed attempts. Please sign up again." });
-        router.push("/userflow/signup");
-      } else {
-        setErrors({ otp: error.response?.data?.message || "Invalid OTP" });
-        setOtpAttempts((prev)=> prev+1);
-      }
-    }
-  
-    setIsLoading(false);
-  };
-
-  const resendOtp = async () => {
-    if (!canResendOtp) return;
-    setCanResendOtp(false);
-    setIsLoading(true);
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/resend-otp`, { email });
-      setErrors({});
-      setCountdown(30); // Reset countdown
-      setOtpAttempts(0); // Reset OTP attempts
-    } catch (error: any) {
-      setErrors({ submit: error.response?.data?.message || "Failed to resend OTP" });
-    }
-    setIsLoading(false);
-  };
 
   return (
     <main className="h-screen flex items-center justify-center p-4 md:p-10 w-full">
@@ -254,30 +193,21 @@ function SignUpCard() {
                 {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
               </div>
             ) : (
-              <div className="space-y-2">
-                <Label>OTP</Label>
-                <Input type="text" placeholder="Enter OTP" onChange={(e) => setOtp(e.target.value)} />
-                {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
-                <Button
-                  className="mt-2 w-full max-w-[500px] bg-gray-600 text-white hover:bg-gray-900"
-                  onClick={resendOtp}
-                  disabled={!canResendOtp || isLoading}
-                >
-                  {canResendOtp ? "Resend OTP" : `Wait ${countdown}s to Resend`}
-                </Button>
-              </div>
+              <OtpVerification email={email} />
             )}
           </CardContent>
 
-          <div className="flex justify-center">
-            <Button
-              className="mt-4 mx-8 w-full max-w-[400px] bg-blue-600 text-white hover:bg-blue-900"
-              onClick={step === 1 ? handleSignup : verifyOtp}
-              disabled={isLoading}
-            >
-              {isLoading ? "Processing..." : step === 1 ? "Get OTP" : "Verify OTP"}
-            </Button>
-          </div>
+          {step === 1 && (
+            <div className="flex justify-center">
+              <Button
+                className="mt-4 mx-8 w-full max-w-[400px] bg-blue-600 text-white hover:bg-blue-900"
+                onClick={handleSignup}
+                disabled={isLoading}
+              >
+                {isLoading ? "Processing..." : "Get OTP"}
+              </Button>
+            </div>
+          )}
 
           <CardFooter className="text-center mt-4">
             <div className="text-sm">
