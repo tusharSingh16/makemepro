@@ -14,7 +14,7 @@ function sendVerificationEmail(to, otp) {
         <p>If you did not request this, please ignore this email.</p>
         <hr style="border: none; border-top: 1px solid #ddd;">
         <p style="text-align: center; color: #888;">MakeMePro Team</p>
-      </div>
+      </div>p
     `;
   return sendEmail(to, subject, htmlContent);
 }

@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true for port 465, false for other ports
   auth: {
-    user: "contactdeep01@gmail.com",
-    pass: "adap axjg foff umcq",
+    user: "traininghorizonco@gmail.com",
+    pass: "hqgq vhia xxez gijr",
   },
 });
 
@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 async function sendEmail(to, subject, htmlContent) {
   try {
     const info = await transporter.sendMail({
-      from: "contactdeep01@gmail.com",
+      from: "traininghorizonco@gmail.com",
       to,
       subject,
       html: htmlContent,
