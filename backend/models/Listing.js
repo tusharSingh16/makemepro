@@ -78,8 +78,14 @@ const listingSchema = new mongoose.Schema({
   maxAge: {
     type: String
   },
-  preRequistes: {
-    type: String
+  preRequisites: {
+    type: [String],
+    default: []
+  },
+  level: {
+    type: String,
+    required: true,
+    enum: ['Beginner', 'Intermediate', 'Advanced', 'All Levels']
   },
   description: {
     type: String,

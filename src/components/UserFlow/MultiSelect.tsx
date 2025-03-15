@@ -32,6 +32,7 @@ interface MultiSelectProp {
     asChild?: boolean;
     className?: string;
     modalPopover?: boolean;
+    isCreatable?: boolean;
 }
 
 export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProp>(
@@ -45,6 +46,7 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProp>(
             modalPopover = false,
             asChild = false,
             className,
+            isCreatable = false,
             ...props
         }, ref
     ) => {
@@ -52,6 +54,8 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProp>(
             useState<string[]>(defaultValue);
         const [isPopoverOpen, setIsPopoverOpen] = useState(false);
         const [isAnimating, setIsAnimating] = useState(false);
+        const [customInput, setCustomInput] = useState("");
+
         const handleInputKeyDown = (
             event: React.KeyboardEvent<HTMLInputElement>
           ) => {
@@ -104,6 +108,23 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProp>(
             }
         };
 
+        const handleCustomInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter' && customInput.trim()) {
+                e.preventDefault();
+                const newValue = customInput.trim();
+                if (!selectedValues.includes(newValue)) {
+                    const newSelectedValues = [...selectedValues, newValue];
+                    setSelectedValues(newSelectedValues);
+                    onValueChange(newSelectedValues);
+                    // Add the new value to options if it doesn't exist
+                    if (!options.find(opt => opt.value === newValue)) {
+                        options.push({ value: newValue, label: newValue });
+                    }
+                }
+                setCustomInput("");
+            }
+        };
+
         return (
             <Popover
                 open={isPopoverOpen}
@@ -129,12 +150,13 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProp>(
                                             <Badge
                                                 key={value}
                                                 className={cn(
-
+                                                    "bg-primary/10 text-primary hover:bg-primary/20 mr-1 mb-1",
+                                                    "flex items-center gap-1 rounded-md px-2 py-1"
                                                 )}
                                             >
-                                                {option?.label}
+                                                {option?.label || value}
                                                 <XCircle
-                                                    className="ml-2 h-4 w-4 cursor-pointer"
+                                                    className="ml-2 h-4 w-4 cursor-pointer hover:text-primary/80"
                                                     onClick={(event) => {
                                                         event.stopPropagation();
                                                         toggleOption(value);
@@ -191,6 +213,18 @@ export const MultiSelect = forwardRef<HTMLButtonElement, MultiSelectProp>(
                     onEscapeKeyDown={() => setIsPopoverOpen(false)}
                 >
                     <Command>
+                        {isCreatable && (
+                            <div className="flex items-center px-2 py-1 border-b">
+                                <input
+                                    type="text"
+                                    value={customInput}
+                                    onChange={(e) => setCustomInput(e.target.value)}
+                                    onKeyDown={handleCustomInputKeyDown}
+                                    placeholder="Type and press Enter to add"
+                                    className="flex-1 px-2 py-1 text-sm outline-none"
+                                />
+                            </div>
+                        )}
                         <CommandList>
                             <CommandEmpty>No results found.</CommandEmpty>
                             <CommandGroup>

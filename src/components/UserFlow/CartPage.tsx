@@ -26,7 +26,7 @@ quantity: string;
   endTime: string;
   minAge: string;
   maxAge: string;
-  preRequistes: string;
+  preRequisites: string;
   description: string;
   isApproved: boolean;
 };

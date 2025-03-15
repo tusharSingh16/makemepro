@@ -146,7 +146,7 @@ exports.editListing = async (req, res) => {
   //   endTime: req.body.endTime,
   //   minAge: req.body.minAge,
   //   maxAge: req.body.maxAge,
-  //   preRequistes: req.body.preRequistes,
+  //   preRequisites: req.body.preRequisites,
   //   description: req.body.description,
   // };
   // const result = getListingSchema.safeParse(inputFromTrainer);

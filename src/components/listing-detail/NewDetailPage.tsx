@@ -15,6 +15,8 @@ import {
   FaDollarSign,
   FaGlobe,
   FaMapMarkerAlt,
+  FaLayerGroup,
+  FaListUl,
 } from "react-icons/fa";
 import { FaChildren, FaLocationPin } from "react-icons/fa6";
 import { Spinner } from "../ui/spinner";
@@ -32,7 +34,8 @@ interface Listing {
   classSize: string;
   startDate: string;
   endDate: string;
-  preRequistes: string;
+  preRequisites: string[];
+  level: string;
   days: [string];
   gender: string;
   startTime: string;
@@ -152,6 +155,13 @@ const NewDetailPage: React.FC<ListingId> = ({
     fetchListingImage();
     fetchTrainerImage();
   }, [listingData.listingId, listingData.imageUrl, instructorData.imageUrl]);
+
+  useEffect(() => {
+    console.log('preRequisites:', listingData.preRequisites);
+    console.log('preRequisites type:', typeof listingData.preRequisites);
+    console.log('is Array:', Array.isArray(listingData.preRequisites));
+  }, [listingData.preRequisites]);
+
   function formatDays(days: string[]) {
     return days?.map((day) => day.replace(/([A-Z][a-z]+)/g, " $1")).join(", ");
   }
@@ -254,7 +264,6 @@ const NewDetailPage: React.FC<ListingId> = ({
                 <FaCalendarDay className="mr-2" />
                 <span>{formatDays(listingData.days)}</span>
               </div>
-
               <div className="flex items-center font-bold">
                 <span>Class Type: {listingData.classSize}</span>
               </div>
@@ -268,20 +277,20 @@ const NewDetailPage: React.FC<ListingId> = ({
                 <FaChildren className="mr-2" />
                 <span>{listingData.gender}</span>
               </div>
-
               <div className="flex items-center font-bold">
                 <FaLocationPin className="mr-2" />
                 <span>Mode: {listingData.mode}</span>
               </div>
               <div className="flex items-center font-bold">
-                <span>
-                  Age Group : {listingData.minAge} - {listingData.maxAge}
-                </span>
+                <FaLayerGroup className="mr-2" />
+                <span>Level: {listingData.level}</span>
               </div>
-              <div className="flex items-center font-bold">
-                <FaGlobe className="mr-2" />
-                <span>{listingData.location}</span>
-              </div>
+              {listingData.mode.toLowerCase() === "offline" && (
+                <div className="flex items-center font-bold">
+                  <FaGlobe className="mr-2" />
+                  <span>{listingData.location}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -294,12 +303,46 @@ const NewDetailPage: React.FC<ListingId> = ({
         </div>
       </div>
 
+      {/* Prerequisites Card */}
+      <div className="border p-4 rounded-lg shadow-md">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <FaListUl className="mr-2" />
+          Pre-Requisites
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {Array.isArray(listingData.preRequisites) && listingData.preRequisites.length > 0 ? (
+            listingData.preRequisites.map((preRequisite, index) => (
+              <span
+                key={index}
+                className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium"
+              >
+                {preRequisite}
+              </span>
+            ))
+          ) : (
+            <span className="text-gray-500">No pre-requisites required</span>
+          )}
+        </div>
+      </div>
+
       {/* Schedule */}
-
-      {/* <div>
-      <Calendar year={2025} startDate={listingData.startDate} endDate={listingData.endDate} days={listingData.days} />
-
-      </div> */}
+      <div className="border p-6 h-full rounded-lg shadow-md">
+        <h2 className="text-xl font-bold mb-6 flex items-center">
+          <FaCalendarAlt className="mr-2" />
+          Schedule
+        </h2>
+        <div className="space-y-4">
+          <div className="text-gray-700">
+            <p className="mb-1">Classes will be held on: <span className="font-medium">{formatDays(listingData.days)}</span></p>
+            <p>Time: <span className="font-medium">{listingData.startTime} - {listingData.endTime}</span></p>
+          </div>
+          <Calendar 
+            startDate={listingData.startDate} 
+            endDate={listingData.endDate} 
+            days={listingData.days} 
+          />
+        </div>
+      </div>
 
       {/* Instructor */}
       <div className="border p-4 rounded-lg shadow-md flex flex-col">

@@ -206,7 +206,7 @@ userRouter.post("/signin", async function (req, res) {
   }
 
   try {
-    const pendingUser = await PendingUser.findOne({ email: userInput.email });
+    const pendingUser = await PendingUser.findOne({ email: userInput.email});
     if (pendingUser) {
       return res.status(400).json({ message: "Please verify your email before logging in." });
     }
@@ -226,6 +226,7 @@ userRouter.post("/signin", async function (req, res) {
     );
 
     // Send login notification email
+
     sendLoginEmail(user.email, user.firstName);
 
     return res.status(200).json({

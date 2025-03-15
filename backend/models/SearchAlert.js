@@ -74,7 +74,7 @@ const listingSchema = new mongoose.Schema({
   maxAge:{
     type: String
   },
-//   preRequistes: {
+//   preRequisites: {
 //     type: String
 //   },
 //   description: {

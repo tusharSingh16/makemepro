@@ -84,118 +84,161 @@ const PreviewPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="w-full flex items-center justify-between">
-        <h1 className="text-2xl font-bold ">Your Listing</h1>
+    <div className="container mx-auto p-6 max-w-5xl">
+      <div className="w-full flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Your Listing</h1>
         <Pill
           text={`${!listing.isApproved ? `Pending for approval` : `Approved`}`}
           color={`${!listing.isApproved ? `bg-yellow-400` : `bg-green-400`}`}
         />
       </div>
-      <div className="bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-2"> {listing.title}</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <p>
-              <span className="font-semibold">Category:</span>{" "}
-              {listing.category}
-            </p>
-            <p>
-              <span className="font-semibold">Sub Category:</span>{" "}
-              {listing.subCategory}
-            </p>
-            <p>
-              <span className="font-semibold">Price:</span> ${listing.price}{" "}
-              {listing.priceMode}
-            </p>
-            <p>
-              <span className="font-semibold">Mode:</span> {listing.mode}
-            </p>
-            <p>
-              <span className="font-semibold">
-                {listing.mode === "Offline" ? "Location" : "Zoom Link"}:
-              </span>{" "}
-              {listing.location}
-            </p>
-            <p>
-              <span className="font-semibold">Quantity:</span>{" "}
-              {listing.quantity}
-            </p>
+      <div className="bg-white shadow-lg rounded-lg p-8 space-y-8">
+        <div className="border-b pb-6">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            {listing.title}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  Category:
+                </span>
+                <span className="text-gray-800">{listing.category}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  Sub Category:
+                </span>
+                <span className="text-gray-800">{listing.subCategory}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">Price:</span>
+                <span className="text-gray-800">
+                  ${listing.price} {listing.priceMode}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">Mode:</span>
+                <span className="text-gray-800">{listing.mode}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  {listing.mode === "Offline" ? "Location" : "Zoom Link"}:
+                </span>
+                <span className="text-gray-800">{listing.location}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  Quantity:
+                </span>
+                <span className="text-gray-800">{listing.quantity}</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  Start Date:
+                </span>
+                <span className="text-gray-800">{listing.startDate}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  End Date:
+                </span>
+                <span className="text-gray-800">{listing.endDate}</span>
+              </div>
+              <div className="flex items-start">
+                <span className="font-medium text-gray-600 w-32">Days:</span>
+                <div className="flex flex-wrap gap-2">
+                  {listing.days.map((day: string) => (
+                    <span
+                      key={day}
+                      className="px-2 py-1 bg-gray-100 rounded-md text-sm"
+                    >
+                      {day}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">Gender:</span>
+                <span className="text-gray-800">{listing.gender}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-600 w-32">
+                  Class Size:
+                </span>
+                <span className="text-gray-800">{listing.classSize}</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <p>
-              <span className="font-semibold">Start Date:</span>{" "}
-              {listing.startDate}
-            </p>
-            <p>
-              <span className="font-semibold">End Date:</span> {listing.endDate}
-            </p>
-            <p className="flex gap-2">
-              <span className="font-semibold">Days:</span>
-              <span className="flex gap-2">
-                {listing.days.map((day: string) => (
-                  <span className="flex" key={day}>
-                    {day}
-                  </span>
-                ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b pb-6">
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <span className="font-medium text-gray-600 w-32">
+                Start Time:
               </span>
-            </p>
-            <p>
-              <span className="font-semibold">Gender:</span> {listing.gender}
-            </p>
+              <span className="text-gray-800">{listing.startTime}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="font-medium text-gray-600 w-32">End Time:</span>
+              <span className="text-gray-800">{listing.endTime}</span>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <span className="font-medium text-gray-600 w-32">Min Age:</span>
+              <span className="text-gray-800">{listing.minAge}</span>
+            </div>
+            <div className="flex items-center">
+              <span className="font-medium text-gray-600 w-32">Max Age:</span>
+              <span className="text-gray-800">{listing.maxAge}</span>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <span className="font-medium text-gray-600">Pre-Requisites:</span>
+            <ul className="list-disc pl-8 space-y-1">
+              {listing.preRequisites.map((prerequisite: string) => (
+                <li key={prerequisite} className="text-gray-800">
+                  {prerequisite}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <p>
-              <span className="font-semibold">Start Time:</span>{" "}
-              {listing.startTime}
-            </p>
-            <p>
-              <span className="font-semibold">End Time:</span> {listing.endTime}
-            </p>
-          </div>
-          <div>
-            <p>
-              <span className="font-semibold">Min Age:</span> {listing.minAge}
-            </p>
-            <p>
-              <span className="font-semibold">Max Age</span> {listing.maxAge}
-            </p>
-          </div>
-          <p>
-            <span className="font-semibold">Class Size</span>{" "}
-            {listing.classSize}
+        <div className="space-y-4 border-b pb-6">
+          <h3 className="font-medium text-gray-600">Description:</h3>
+          <p className="whitespace-pre-line text-gray-800 leading-relaxed">
+            {listing.description}
           </p>
-          <p>
-            <span className="font-semibold">Pre-Requistes</span>{" "}
-            {listing.preRequistes}
-          </p>
-          <div></div>
         </div>
 
-        <div>
-          <p>
-            <span className="font-semibold">Description:</span>
-          </p>
-          <p className="whitespace-pre-line">{listing.description}</p>
-        </div>
-        <div className="my-4">
-          <p>
-            <span className="font-semibold ">Enrollments:</span>
-          </p>
-          <div className="m-4 w-3/4">
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-600">Enrollments:</h3>
+          <div className="w-full">
             <MemberEnrollmentTable listingId={listingId} />
           </div>
         </div>
       </div>
-      <div className="flex justify-between pt-3">
-        <Button onClick={handleClick}>Edit Listing</Button>
-        <Button onClick={() => handleDelete(listingId)}>Delete Listing</Button>
+
+      <div className="flex justify-between pt-6">
+        <Button
+          onClick={handleClick}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+        >
+          Edit Listing
+        </Button>
+        <Button
+          onClick={() => handleDelete(listingId)}
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
+        >
+          Delete Listing
+        </Button>
       </div>
-      {/* Popup for messages */}
+
       <Popup
         message={popUpMessage}
         isOpen={showPopup}

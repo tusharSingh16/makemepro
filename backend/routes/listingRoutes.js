@@ -28,7 +28,8 @@ const getListingSchema = zod.object({
   endTime: zod.string().optional(),
   minAge: zod.string(),
   maxAge: zod.string(),
-  preRequistes: zod.string(),
+  preRequisites: zod.array(zod.string()),
+  level: zod.string(),
   description: zod.string(),
 });
 const postListingSchema = zod.object({
@@ -97,7 +98,8 @@ listingRouter.get("/listing", async (req, res) => {
     endTime,
     minAge,
     maxAge,
-    preRequistes,
+    preRequisites,
+    level,
     description,
     minPrice,
     maxPrice,
@@ -273,7 +275,8 @@ listingRouter.post(
       endTime: req.body.endTime,
       minAge: req.body.minAge,
       maxAge: req.body.maxAge,
-      preRequistes: req.body.preRequistes,
+      preRequisites: req.body.preRequisites,
+      level: req.body.level,
       description: req.body.description,
     };
     const result = getListingSchema.safeParse(inputFromTrainer);
@@ -340,7 +343,8 @@ listingRouter.put(
       endTime: req.body.endTime,
       minAge: req.body.minAge,
       maxAge: req.body.maxAge,
-      preRequistes: req.body.preRequistes,
+      preRequisites: req.body.preRequisites,
+      level: req.body.level,
       description: req.body.description,
       isApproved: false,
     };

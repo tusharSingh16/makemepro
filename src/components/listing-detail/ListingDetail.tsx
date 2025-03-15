@@ -40,7 +40,8 @@ interface ListingCard {
   mode: string;
   imageUrl: string;
   location: string;
-  preRequistes: string;
+  preRequisites: [string];
+  level: string;
   quantity: string;
   classSize: string;
   startDate: string;
