@@ -63,6 +63,18 @@ function SignUpCard() {
       return () => clearInterval(timer);
     }
   }, [step]);
+  // the validation function validateInputs() is checking these values immediately after they're set, 
+  // but React state updates are asynchronous.
+  // hence we add a debounce function to delay the validation function by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (password && confirmPassword) {
+        validateInputs();
+      }
+    }, 300); // 300ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [password, confirmPassword]);
 
   // Validate User Input
   const validateInputs = () => {
@@ -143,6 +155,7 @@ function SignUpCard() {
       await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/resend-otp`, { email });
       setErrors({});
       setCountdown(30); // Reset countdown
+      setOtpAttempts(0); // Reset OTP attempts
     } catch (error: any) {
       setErrors({ submit: error.response?.data?.message || "Failed to resend OTP" });
     }

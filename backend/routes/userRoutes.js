@@ -136,12 +136,13 @@ userRouter.post("/verify-email", async (req, res) => {
 
   try {
     const pendingUser = await PendingUser.findOne({ email });
+    // console.log("pending user is:", pendingUser );
     if (!pendingUser) {
       return res.status(411).json({
         message: "Email not found in Pending users. Sign Up again",
       });
     }
-    if (pendingUser.otp !== otp.toString()) {
+    if (pendingUser.otp.toString() !== otp) {
       pendingUser.otpAttempts += 1;
 
       if (pendingUser.otpAttempts >= 3) {
@@ -150,7 +151,7 @@ userRouter.post("/verify-email", async (req, res) => {
           message: "Too many attempts. Please sign up again.",
         });
       }
-
+      // to save otp attemps
       await pendingUser.save();
       return res.status(400).json({
         message: "Invalid OTP. Try again.",
@@ -161,11 +162,12 @@ userRouter.post("/verify-email", async (req, res) => {
       // await PendingUser.deleteOne({
       //   email: email,})
       return res.json({
-        message: "OTP has expired. Please resend otp again",
+        message: "OTP has expired. Please resend otp",
       })
     }
-    console.log("Otp entered is: ", otp);
-    console.log("Otp in db is: ", pendingUser.otp);
+    // console.log("Otp entered is: ", otp);
+    // console.log("Otp in db is: ", pendingUser.otp);
+
     // create the user when all checks have passed
     const user = await User.create({
       firstName: pendingUser.firstName,
@@ -176,7 +178,7 @@ userRouter.post("/verify-email", async (req, res) => {
     })
     console.log("User created")
     await sendWelcomeEmail(user.email, user.firstName);
-    const token = await jwt.sign({ userID: user._id, role: user.role }, JWT_SECRET);
+    const token = jwt.sign({ userID: user._id, role: user.role }, JWT_SECRET);
     await PendingUser.deleteOne({
       email: email,
     })
@@ -217,21 +219,16 @@ userRouter.post("/signin", async function (req, res) {
       return res.status(401).send({ msg: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET, // Ensure JWT_SECRET is stored in environment variables
+      process.env.JWT_SECRET, 
       { expiresIn: "1h" }
     );
 
     // Send login notification email
-    // await sendEmail(
-    //   user.email,
-    //   "Login Notification",
-    //   `Hello ${user.firstName}, \n\nYou have successfully logged into your account.`
-    // );
 
-    // Send success response
+    sendLoginEmail(user.email, user.firstName);
+
     return res.status(200).json({
       msg: "User logged in successfully",
       token: token,
@@ -248,6 +245,9 @@ userRouter.post("/resend-otp", async (req, res) => {
 
   try {
     const pendingUser = await PendingUser.findOne({ email });
+    pendingUser.otpAttempts = 0;
+    // to update pending users otp attempts
+    await pendingUser.save();
     if (!pendingUser) {
       return res.status(400).json({ message: "User not found. Please sign up." });
     }
