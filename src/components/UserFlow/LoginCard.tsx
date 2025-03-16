@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/Shared/ui/button";
 import {
   Card,
@@ -16,7 +16,6 @@ import GoogleAuth from "./GoogleAuth";
 import Popup from "../trainer-dashboard/PopUp";
 import Image from "next/image";
 import { Spinner } from "../ui/spinner";
-import OtpVerification from "./OtpVerification";
 
 function LoginCard() {
   const [email, setEmail] = useState("");
@@ -70,6 +69,12 @@ function LoginCard() {
       }
     }
   }
+  // to show needVerification page
+  useEffect(()=>  {
+    if(needVerification)  {
+      router.push("/userflow/VerifyOtpOnLogin");
+    }
+  }, [needVerification, router]);
 
   return (
     <main className="h-screen flex items-center justify-center p-5 sm:p-10 w-full overflow-hidden">
@@ -88,10 +93,6 @@ function LoginCard() {
 
         {/* Form Section */}
         <div>
-        
-  {needVerification ? (
-    <OtpVerification email={email}/>
-  ) : (
     <Card className="w-full rounded-l-none sm:w-[480px] h-[600px] mx-auto pt-10 shadow-2xl">
       <CardHeader className="text-center">
         <h2 className="text-2xl text-gray-600 font-bold">Login</h2>
@@ -216,7 +217,6 @@ function LoginCard() {
         <GoogleAuth />
       </div>
     </Card>
-  )}
 </div>
 
       </div>

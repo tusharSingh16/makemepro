@@ -35,27 +35,15 @@ function SignUpCard() {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1); // Step 1: Signup | Step 2: OTP Verification
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [validationReady, setValidationReady] = useState(false);
 
-  // the validation function validateInputs() is checking these values immediately after they're set, 
-  // but React state updates are asynchronous.
-  // hence we add a debounce function to delay the validation function by 300ms
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (password && confirmPassword) {
-        validateInputs();
-      }
-    }, 300); // 300ms debounce
-    
-    return () => clearTimeout(timer);
-  }, [password, confirmPassword]);
-
-  // Validate User Input
+  // Create validation function outside of effects
   const validateInputs = useCallback(() => {
     try {
       signUpSchema.parse({ email, firstName, lastName, password, confirmPassword });
@@ -63,43 +51,74 @@ function SignUpCard() {
       return true;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
+        const fieldErrors = {};
         e.errors.forEach((error) => {
           if (error.path[0]) {
-            fieldErrors[error.path[0] as string] = error.message;
+            fieldErrors[error.path[0]] = error.message;
           }
         });
         setErrors(fieldErrors);
       }
       return false;
     }
-  }, [email,firstName, lastName, password, confirmPassword]);
+  }, [email, firstName, lastName, password, confirmPassword]);
   
+  // Single useEffect for validation with debounce
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (password && confirmPassword) {
+    // Only run validation if we have both password fields with values
+    if (password && confirmPassword) {
+      const timer = setTimeout(() => {
         validateInputs();
-      }
-    }, 300); // 300ms debounce delay
-
-    return () => clearTimeout(timer); // Cleanup timeout on dependency change
+        setValidationReady(true);
+      }, 300); // 300ms debounce
+      
+      return () => {
+        clearTimeout(timer);
+        setValidationReady(false); // Reset validation ready state when dependencies change
+      };
+    }
   }, [password, confirmPassword, validateInputs]);
 
+  // Also validate any field changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (email || firstName || lastName) {
+        validateInputs();
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [email, firstName, lastName, validateInputs]);
+
   const handleSignup = useCallback(async () => {
+    // Run validation one more time before submission
     if (!validateInputs()) return;
+    
     setIsLoading(true);
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`, { email, firstName, lastName, password });
+      await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`, { 
+        email, 
+        firstName, 
+        lastName, 
+        password 
+      });
       setStep(2);
-    } catch (error: any) {
-      if (typeof error.response?.data?.message === "string" && error.response.data.message.includes("email already exists")) {
-        setErrors((prevErrors) => ({ ...prevErrors, email: "Email already exists" }));
+    } catch (error) {
+      if (typeof error.response?.data?.message === "string" && 
+          error.response.data.message.includes("email already exists")) {
+        setErrors((prevErrors) => ({ 
+          ...prevErrors, 
+          email: "Email already exists" 
+        }));
       } else {
-        setErrors((prevErrors) => ({ ...prevErrors, submit: error.response?.data?.message || "Signup failed" }));
+        setErrors((prevErrors) => ({ 
+          ...prevErrors, 
+          submit: error.response?.data?.message || "Signup failed" 
+        }));
       }
     }
     setIsLoading(false);
-  }, [email, firstName, lastName, password]);
+  }, [email, firstName, lastName, password, validateInputs]);
 
   return (
     <main className="h-screen flex items-center justify-center p-4 md:p-10 w-full">
@@ -119,16 +138,31 @@ function SignUpCard() {
             {step === 1 ? (
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input type="email" placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} />
+                <Input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)} 
+                />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                 {errors.submit && <p className="text-red-500 text-sm">{errors.submit}</p>}
 
                 <Label>First Name</Label>
-                <Input type="text" placeholder="Enter first name" onChange={(e) => setFirstName(e.target.value)} />
+                <Input 
+                  type="text" 
+                  placeholder="Enter first name"
+                  value={firstName} 
+                  onChange={(e) => setFirstName(e.target.value)} 
+                />
                 {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
 
                 <Label>Last Name</Label>
-                <Input type="text" placeholder="Enter last name" onChange={(e) => setLastName(e.target.value)} />
+                <Input 
+                  type="text" 
+                  placeholder="Enter last name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)} 
+                />
                 {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
 
                 <Label>Password</Label>
@@ -136,6 +170,7 @@ function SignUpCard() {
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter password"
+                    value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <button
@@ -171,6 +206,7 @@ function SignUpCard() {
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm password"
+                    value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
                   <button
@@ -225,4 +261,3 @@ function SignUpCard() {
 }
 
 export default SignUpCard;
-
