@@ -1,10 +1,11 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/Shared/ui/button";
 import { Input } from "@/components/Shared/ui/input";
-import { Label } from "@/components/Shared/ui/label";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/UserFlow/NavBar";
+import Footer from "@/components/UserFlow/Footer";
 
 interface OtpVerificationProps {
   email: string;
@@ -82,40 +83,45 @@ function VerifyOtpOnLogin({ email }: OtpVerificationProps) {
   };
 
   return (
-    <div className="space-y-4 bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-center">Verify Your Email</h2>
-      <p className="text-gray-600 text-sm text-center">Enter the OTP sent to {email}</p>
-
-      <div className="space-y-2">
-        <Label htmlFor="otp">OTP</Label>
-        <Input
-          id="otp"
-          type="text"
-          placeholder="Enter OTP"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          className="text-center text-lg tracking-widest"
-          autoFocus
-        />
-        {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
-      </div>
-
-      <Button
-        className="w-full bg-blue-600 text-white hover:bg-blue-900"
-        onClick={verifyOtp}
-        disabled={isLoading}
-      >
-        {isLoading ? "Verifying..." : "Verify OTP"}
-      </Button>
-
-      <Button
-        className="w-full bg-gray-600 text-white hover:bg-gray-900"
-        onClick={resendOtp}
-        disabled={!canResendOtp || isLoading}
-      >
-        {canResendOtp ? "Resend OTP" : `Wait ${countdown}s to Resend`}
-      </Button>
-      {errors.submit && <p className="text-red-500 text-sm text-center">{errors.submit}</p>}
+    <div className="flex flex-col">
+      <Navbar />
+      <main className="flex flex-col items-center justify-center bg-gray-100 h-[calc(100vh-18rem)]">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-2xl font-semibold text-center text-gray-800 mb-4">Verify Your Email</h2>
+          <p className="text-gray-600 text-center mb-6">Enter the OTP sent to <span className="font-medium">{email}</span></p>
+          <div className="flex flex-col items-center gap-4">
+            <Input
+              id="otp"
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="text-center text-lg tracking-widest w-full"
+              autoFocus
+            />
+            {errors.otp && <p className="text-red-500 text-sm">{errors.otp}</p>}
+            <Button
+              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              onClick={verifyOtp}
+              disabled={isLoading}
+            >
+              {isLoading ? "Verifying..." : "Verify OTP"}
+            </Button>
+            <div className="flex flex-col items-center gap-2">
+              <label className="text-gray-600 text-sm">Didn't receive the OTP?</label>
+              <Button
+                className={`w-full ${canResendOtp ? 'bg-gray-500 hover:bg-gray-600' : 'bg-gray-400'} text-white`}
+                onClick={resendOtp}
+                disabled={!canResendOtp || isLoading}
+              >
+                {canResendOtp ? "Resend" : `Wait ${countdown}s to Resend`}
+              </Button>
+            </div>
+          </div>
+          {errors.submit && <p className="text-red-500 text-sm text-center mt-4">{errors.submit}</p>}
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }
