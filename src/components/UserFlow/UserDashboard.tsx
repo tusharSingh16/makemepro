@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import Image from "next/image";
 
 const UserDashboard = () => {
   const [userName, setUserName] = useState<string | null>(null);
@@ -173,14 +174,14 @@ useEffect(() => {
 
   return (
     <>
-      <div className="relative inline-block text-left flex flex-row items-center space-x-4">
+      <div className="relative text-left flex flex-row items-center space-x-4">
         {/* Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center space-x-2">
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
               {userName || "Loading..."}
             </span>
-            <img
+            <Image
               src="/img/new/user.jpg" // this should come from s3 
               alt="Profile"
               className="h-8 w-8 rounded-full object-cover"

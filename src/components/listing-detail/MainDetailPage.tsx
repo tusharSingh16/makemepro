@@ -73,7 +73,7 @@ const MainDetailPage: React.FC<ListingId> = ({ listingId, listingData }) => {
     };
 
     fetchFavorites();
-  }, [listingData.listingId]);
+  }, [listingData.listingId, listingData.imageUrl]);
 
   // Handle favorite button click
   const handleOnClick = async (event: React.MouseEvent<HTMLImageElement>) => {

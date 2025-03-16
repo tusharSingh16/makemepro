@@ -46,7 +46,7 @@ const TrainerCard: React.FC<TrainerProps> = ({ trainer }) => {
   return (
     <Card className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 hover:-translate-y-2">
       {getImageUrl ? (
-        <img
+        <Image
           src={getImageUrl}
           alt={`${trainer.fname} ${trainer.lname}`}
           className="w-full h-[300px] object-cover rounded-t-lg"

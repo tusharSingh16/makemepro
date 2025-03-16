@@ -143,7 +143,7 @@ const SubCategory: React.FC<{ categoryName: string }> = ({ categoryName }) => {
                     router.push(`/${categoryName}/${subCategory}`);
                   }}
                 >
-                  <img
+                  <Image
                     src={`/img/new/${subCategory}.jpg`}
                     alt={"abc"}
                     className="w-full h-[300px] object-cover rounded-t-lg"

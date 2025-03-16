@@ -7,6 +7,7 @@ import { setForm } from "@/lib/store/formSlice";
 import { MapPin, Users } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
+import Image from "next/image";
 
 interface ListingCardProps {
   rentalId: string;
@@ -93,7 +94,7 @@ const RentalCard: React.FC<ListingCardProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
           <Card className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 hover:-translate-y-2">
             <div className="relative">
-              <img
+              <Image
                 src={getImageUrl}
                 alt={name}
                 className="w-full h-[250px] object-cover rounded-t-lg"

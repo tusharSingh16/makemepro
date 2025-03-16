@@ -7,11 +7,8 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/UserFlow/NavBar";
 import Footer from "@/components/UserFlow/Footer";
 
-interface OtpVerificationProps {
-  email: string;
-}
 
-function VerifyOtpOnLogin({ email }: OtpVerificationProps) {
+function VerifyOtpOnLogin({ email }: any) {
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);

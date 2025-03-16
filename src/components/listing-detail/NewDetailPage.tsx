@@ -154,7 +154,7 @@ const NewDetailPage: React.FC<ListingId> = ({
     fetchFavorites();
     fetchListingImage();
     fetchTrainerImage();
-  }, [listingData.listingId, listingData.imageUrl, instructorData.imageUrl]);
+  }, [listingData.listingId, listingData.imageUrl, instructorData.imageUrl, getImageUrl, instructorData]);
 
   useEffect(() => {
     console.log('preRequisites:', listingData.preRequisites);

@@ -12,6 +12,16 @@ import GoogleAuth from "./GoogleAuth";
 import Image from "next/image";
 import OtpVerification from "./OtpVerification";
 
+// Define a type for the errors state
+interface Errors {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  password?: string;
+  confirmPassword?: string;
+  submit?: string;
+}
+
 // Validation Schema
 const signUpSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -35,7 +45,7 @@ function SignUpCard() {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Errors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1); // Step 1: Signup | Step 2: OTP Verification
   const router = useRouter();
@@ -51,10 +61,10 @@ function SignUpCard() {
       return true;
     } catch (e) {
       if (e instanceof z.ZodError) {
-        const fieldErrors = {};
+        const fieldErrors: Errors = {};
         e.errors.forEach((error) => {
           if (error.path[0]) {
-            fieldErrors[error.path[0]] = error.message;
+            fieldErrors[error.path[0] as keyof Errors] = error.message;
           }
         });
         setErrors(fieldErrors);
@@ -65,7 +75,6 @@ function SignUpCard() {
   
   // Single useEffect for validation with debounce
   useEffect(() => {
-    // Only run validation if we have both password fields with values
     if (password && confirmPassword) {
       const timer = setTimeout(() => {
         validateInputs();
@@ -74,7 +83,7 @@ function SignUpCard() {
       
       return () => {
         clearTimeout(timer);
-        setValidationReady(false); // Reset validation ready state when dependencies change
+        setValidationReady(false);
       };
     }
   }, [password, confirmPassword, validateInputs]);
@@ -91,7 +100,6 @@ function SignUpCard() {
   }, [email, firstName, lastName, validateInputs]);
 
   const handleSignup = useCallback(async () => {
-    // Run validation one more time before submission
     if (!validateInputs()) return;
     
     setIsLoading(true);
@@ -103,8 +111,8 @@ function SignUpCard() {
         password 
       });
       setStep(2);
-    } catch (error) {
-      if (typeof error.response?.data?.message === "string" && 
+    } catch (error: any) {
+      if (error.response?.data?.message && typeof error.response.data.message === "string" && 
           error.response.data.message.includes("email already exists")) {
         setErrors((prevErrors) => ({ 
           ...prevErrors, 

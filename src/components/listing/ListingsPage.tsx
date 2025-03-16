@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import axios from "axios"
 import SearchSection from "../UserFlow/SearchSection"
@@ -91,12 +91,14 @@ const ListingsPage: React.FC<{
   const [selectedGender, setSelectedGender] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     const filtered = listings.filter(
-      (listing) => searchwords === "" || listing.title.toLowerCase().includes(searchwords.toLowerCase())
+      (listing) =>
+        searchwords === "" ||
+        listing.title.toLowerCase().includes(searchwords.toLowerCase())
     );
     setFilteredListings(filtered);
-  };
+  }, [listings, searchwords]);
 
   const resetFilters = () => {
     setKeywords("")
@@ -147,12 +149,12 @@ const ListingsPage: React.FC<{
     };
 
     fetchCourses();
-  }, [keywords, selectedCategory, selectedSubCategory, RateRange, ageLimit, selectedGender]);
+  }, [keywords, selectedCategory, selectedSubCategory, RateRange, ageLimit, selectedGender, handleSearch]);
 
   // Ensure filtering also works on searchwords update
   useEffect(() => {
     handleSearch();
-  }, [searchwords, listings]);
+  }, [searchwords, listings, handleSearch]);
 
   // Generate skeleton cards array
   const skeletonCards = Array(8).fill(0).map((_, index) => (
